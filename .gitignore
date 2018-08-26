@@ -102,3 +102,295 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+/samples/golden_corpus/.gitignore
+/samples/golden_corpus/LICENSE
+/samples/golden_corpus/Makefile
+/samples/golden_corpus/README.md
+/samples/golden_corpus/core/build_golden_corpus.py
+/samples/golden_corpus/core/phrases
+/samples/golden_corpus/core/roots.txt
+/samples/golden_corpus/core/stems.txt
+/samples/golden_corpus/core/stop_words.txt
+/samples/golden_corpus/core/strange_words.txt
+/samples/golden_corpus/core/strangeword_explanation.txt
+/samples/golden_corpus/core/words.txt
+/rooter/archive/visualize_tests_stats_old.py
+/rooter/archive/eval_tashaphyne.py
+/rooter/archive/eval_tashaphyne2.py
+/rooter/archive/roots.py
+/rooter/archive/rootslib.py
+/rooter/archive/rootslib2.py
+/rooter/archive/test.py
+/rooter/archive/testTokenize.py
+/rooter/archive/test_stemmer_analex.py
+/rooter/archive/test_stemmer_analex2.py
+/rooter/archive/test_stemmer_analex_quran.py
+/rooter/archive/test_transform.bat
+/rooter/archive/test_transform.py
+/rooter/archive/test_vect.py
+/rooter/archive/testdom6.py
+/rooter/archive/testwaznlike.py
+/rooter/archive/updates
+/samples/quran_word_v0.4.csv
+/samples/quran_word_v0.4.xls
+/samples/quran_word_v0.4_khoja.csv
+/samples/quran_word_v0.5.csv
+/samples/quran_word_v0.5.csv.khoja
+/to export/Makefile
+/to export/README.md
+/to export/requirements.txt
+/to export/rooter/abstract_stem_const.py
+/to export/rooter/abstractstemmer.py
+/to export/rooter/archive/eval_tashaphyne.py
+/to export/rooter/archive/eval_tashaphyne2.py
+/to export/rooter/archive/roots.py
+/to export/rooter/archive/rootslib.py
+/to export/rooter/archive/rootslib2.py
+/to export/rooter/archive/test.py
+/to export/rooter/archive/testTokenize.py
+/to export/rooter/archive/test_stemmer_analex.py
+/to export/rooter/archive/test_stemmer_analex2.py
+/to export/rooter/archive/test_stemmer_analex_quran.py
+/to export/rooter/archive/test_transform.bat
+/to export/rooter/archive/test_transform.py
+/to export/rooter/archive/test_vect.py
+/to export/rooter/archive/testdom6.py
+/to export/rooter/archive/testwaznlike.py
+/to export/rooter/archive/updates
+/to export/rooter/archive/visualize_tests_stats_old.py
+/to export/rooter/roots_const.py
+/to export/rooter/roots_const9000.py
+/to export/rooter/rootslibclass.py
+/to export/rooter/stem_const.py
+/to export/rooter/stopwords/__init__.py
+/to export/rooter/stopwords/arabicstopwords.py
+/to export/rooter/stopwords/roots.py
+/to export/rooter/stopwords/stopclass.py
+/to export/rooter/stopwords/stopwords_classified.py
+/to export/rooter/stopwords/stopwordsallforms.py
+/to export/rooter/tests/stem_custom.py
+/to export/rooter/tests/test_abstrcatstemmer.py
+/to export/rooter/tests/test_isri.py
+/to export/rooter/tests/testrootslib.py
+/to export/samples/gold.csv
+/to export/samples/gold.csv.farasa
+/to export/samples/gold.csv.khoja
+/to export/samples/nafis.unq
+/to export/samples/nafis.unq.farasa
+/to export/samples/nafis.unq.khoja
+/to export/samples/qc.unq
+/to export/samples/qc.unq.farasa
+/to export/samples/qc.unq.khoja
+/to export/samples/quran_word_v0.5.2.csv
+/to export/samples/quran_word_v0.5.2.csv.farasa
+/to export/samples/quran_word_v0.5.2.csv.khoja
+/to export/samples/quranic_corpus.csv.dataset
+/to export/samples/quranic_corpus.csv.dataset.khoja
+/to export/scripts/convert_farasa.py
+/to export/scripts/eval_stemming_result.py
+/to export/scripts/export_nafis_dataset.py
+/to export/scripts/show_datasets_stats.py
+/to export/scripts/test_stemmers_rooters.py
+/to export/scripts/visualize_tests_stats.py
+/to export/to export.zip
+/prepare_dataset/output/nafis
+/prepare_dataset/output/nafis.csv
+/prepare_dataset/output/nafis.unq
+/prepare_dataset/output/nafis_glod_standard.ods
+/prepare_dataset/output/nafis_glod_standard.xlsx
+/prepare_dataset/output/txt
+/output/qc.unq
+/output/qc.unq.stats
+/output/qc.unq.stats.tex
+/output/qc.unq.tex
+/output/quran_word_v0.5.2.csv
+/output/quran_word_v0.5.2.csv.stats
+/output/test_stats/gold.csv.stats
+/output/test_stats/nafis.unq.stats
+/output/test_stats/qc.unq.stats
+/output/test_stats/quran_word_v0.5.2.csv.stats
+/output/testlatex/document.aux
+/output/testlatex/document.pdf
+/output/testlatex/document.synctex.gz
+/output/testlatex/document.tex
+/output/testlatex/images
+/output/visualize.tex.tex
+/resources/ARASTEM-corpus/
+/resources/stemmerEval/
+/samples/samples.zip
+/output/control.csv
+/output/datasets_stats/gold.csv.sets.stats
+/output/datasets_stats/nafis.unq.sets.stats
+/output/datasets_stats/qc.unq.sets.stats
+/output/datasets_stats/quran_word_v0.5.2.csv.sets.stats
+/output/global.stats.csv
+/output/gold.csv
+/output/gold.csv.stats
+/output/gold.old.csv
+/output/gold.old4.csv
+/output/images/root-micro-Accuracy.png
+/output/images/root-micro-F1-score.png
+/output/images/stem-macro-F1-score.png
+/output/images/stem-micro-F1-score.png
+/output/nafis.unq
+/output/nafis.unq.stats
+/output/one.stats
+/output/pivots/root-micro-Accuracy.csv
+/output/pivots/root-micro-F1-score.csv
+/output/pivots/stem-macro-F1-score.csv
+/output/pivots/stem-micro-F1-score.csv
+/other_stemmers/Arabic-Stemming-Toolkit/
+/other_stemmers/FarasaSegmenter/
+/other_stemmers/assemStemmer/
+/other_stemmers/assem_modified/AssemAsStemmer-snowballstemmer-1.1.0.zip
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/MANIFEST.in
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/PKG-INFO
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/README.rst
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/setup.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/sample/stemwords.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/sample/testapp.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/__init__.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/among.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/arabic_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/basestemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/danish_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/dutch_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/english_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/finnish_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/french_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/german_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/hungarian_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/italian_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/norwegian_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/porter_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/portuguese_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/romanian_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/russian_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/spanish_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/swedish_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/tamil_stemmer.py
+/other_stemmers/assem_modified/snowballstemmer-1.1.0/src/snowballstemmer/turkish_stemmer.py
+/other_stemmers/breakdown/AraNLP/.classpath
+/other_stemmers/breakdown/AraNLP/.project
+/other_stemmers/breakdown/AraNLP/.settings/org.eclipse.jdt.core.prefs
+/other_stemmers/breakdown/AraNLP/LICENSE.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/definite_article.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/diacritics.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/duplicate.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/first_waw.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/first_yah.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/last_alif.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/last_hamza.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/last_maksoura.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/last_yah.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/mid_waw.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/mid_yah.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/prefixes.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/punctuation.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/quad_roots.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/stopwords.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/strange.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/suffixes.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/tri_patt.txt
+/other_stemmers/breakdown/AraNLP/StemmerFiles/tri_roots.txt
+/other_stemmers/breakdown/AraNLP/arabic-sen.bin
+/other_stemmers/breakdown/AraNLP/arabic-token.bin
+/other_stemmers/breakdown/AraNLP/bin/main/Test.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/AraNormalizer.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/Constants.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/DiacriticsRemover.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/LightStemmer1.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/LightStemmer10.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/LightStemmer2.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/LightStemmer3.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/LightStemmer8.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/PunctuationsRemover.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/RootStemmer.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/SentenceDetector.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/SpaceTokenizer.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/StanfordPOSTagger.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/StanfordSegmenter.class
+/other_stemmers/breakdown/AraNLP/bin/utilities/TrainedTokenizer.class
+/other_stemmers/breakdown/AraNLP/data/arabic-accurate.tagger
+/other_stemmers/breakdown/AraNLP/data/arabic-accurate.tagger.props
+/other_stemmers/breakdown/AraNLP/data/arabic-segmenter-atbtrain.ser.gz
+/other_stemmers/breakdown/AraNLP/data/dict/Makefile
+/other_stemmers/breakdown/AraNLP/data/dict/as.non
+/other_stemmers/breakdown/AraNLP/data/dict/char.ctb.list
+/other_stemmers/breakdown/AraNLP/data/dict/character_list
+/other_stemmers/breakdown/AraNLP/data/dict/character_list.as
+/other_stemmers/breakdown/AraNLP/data/dict/character_list.gb18030
+/other_stemmers/breakdown/AraNLP/data/dict/character_list.hk
+/other_stemmers/breakdown/AraNLP/data/dict/ctb.non
+/other_stemmers/breakdown/AraNLP/data/dict/hk.non
+/other_stemmers/breakdown/AraNLP/data/dict/in.as
+/other_stemmers/breakdown/AraNLP/data/dict/in.ctb
+/other_stemmers/breakdown/AraNLP/data/dict/in.ctb.gb18030
+/other_stemmers/breakdown/AraNLP/data/dict/in.hk
+/other_stemmers/breakdown/AraNLP/data/dict/in.pk
+/other_stemmers/breakdown/AraNLP/data/dict/in.pk.gb
+/other_stemmers/breakdown/AraNLP/data/dict/pku.non
+/other_stemmers/breakdown/AraNLP/data/dict/pos_close/char.ctb.list
+/other_stemmers/breakdown/AraNLP/data/dict/pos_open/character_list.as
+/other_stemmers/breakdown/AraNLP/data/dict/pos_open/character_list.hk
+/other_stemmers/breakdown/AraNLP/data/dict/pos_open/character_list.pku.gb
+/other_stemmers/breakdown/AraNLP/data/dict/pos_open/character_list.pku.utf8
+/other_stemmers/breakdown/AraNLP/src/main/Test.java
+/other_stemmers/breakdown/AraNLP/src/utilities/AraNormalizer.java
+/other_stemmers/breakdown/AraNLP/src/utilities/Constants.java
+/other_stemmers/breakdown/AraNLP/src/utilities/DiacriticsRemover.java
+/other_stemmers/breakdown/AraNLP/src/utilities/LightStemmer1.java
+/other_stemmers/breakdown/AraNLP/src/utilities/LightStemmer10.java
+/other_stemmers/breakdown/AraNLP/src/utilities/LightStemmer2.java
+/other_stemmers/breakdown/AraNLP/src/utilities/LightStemmer3.java
+/other_stemmers/breakdown/AraNLP/src/utilities/LightStemmer8.java
+/other_stemmers/breakdown/AraNLP/src/utilities/PunctuationsRemover.java
+/other_stemmers/breakdown/AraNLP/src/utilities/RootStemmer.java
+/other_stemmers/breakdown/AraNLP/src/utilities/SentenceDetector.java
+/other_stemmers/breakdown/AraNLP/src/utilities/SpaceTokenizer.java
+/other_stemmers/breakdown/AraNLP/src/utilities/StanfordPOSTagger.java
+/other_stemmers/breakdown/AraNLP/src/utilities/StanfordSegmenter.java
+/other_stemmers/breakdown/AraNLP/src/utilities/TrainedTokenizer.java
+/other_stemmers/breakdown/light10/light10stemmer.jar
+/other_stemmers/breakdown/light10stemmer/
+/other_stemmers/isri/testIsri.py
+/other_stemmers/isri/test_stemmer_analex.py
+/other_stemmers/khoja-stemmer-command-line/
+/other_stemmers/moataz-arabic-light-stemmer/
+/other_stemmers/snowballstemmer-1.2.0/MANIFEST.in
+/other_stemmers/snowballstemmer-1.2.0/PKG-INFO
+/other_stemmers/snowballstemmer-1.2.0/README.rst
+/other_stemmers/snowballstemmer-1.2.0/modules.txt
+/other_stemmers/snowballstemmer-1.2.0/setup.py
+/other_stemmers/snowballstemmer-1.2.0/src/sample/stemwords.py
+/other_stemmers/snowballstemmer-1.2.0/src/sample/testapp.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/__init__.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/among.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/arabic_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/basestemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/danish_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/dutch_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/english_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/finnish_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/french_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/german_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/hungarian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/indonesian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/irish_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/italian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/lithuanian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/nepali_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/norwegian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/porter_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/portuguese_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/romanian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/russian_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/spanish_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/swedish_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/tamil_stemmer.py
+/other_stemmers/snowballstemmer-1.2.0/src/snowballstemmer/turkish_stemmer.py
+/archives/AraNLP.zip
+/archives/snowballstemmer-1.2.0.tar.gz
+/doc/assem control.png
+/doc/assem control2.png
+/doc/control-golden.csv
