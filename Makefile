@@ -23,7 +23,10 @@ default: all
 # Clean build files
 all:
 
-
+# Publish to github
+publish:
+	git push origin master 
+	
 # prepare corpus to be compatible with this script:
 prepare_all: prepare_gold
 prepare_gold:

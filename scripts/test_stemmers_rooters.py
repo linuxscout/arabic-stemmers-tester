@@ -19,7 +19,7 @@
 
 import sys
 sys.path.append('../rooter')
-sys.path.append('rooter'
+sys.path.append('rooter')
 sys.path.append('../')
 
 import re
