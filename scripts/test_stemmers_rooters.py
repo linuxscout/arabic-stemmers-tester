@@ -7,8 +7,8 @@
 #
 # Author:      Taha Zerrouki (taha.zerrouki[at]gmail.com)
 #
-# Created:     2016-06-14
-# Copyright:   (c) Taha Zerrouki 2016
+# Created:     2018-08-14
+# Copyright:   (c) Taha Zerrouki 2018
 # Licence:     GPL
 #-----------------------------------------------------------------------
 """
@@ -121,18 +121,18 @@ def calcul_stats_old(dataframe, names, root_flag = True, stem_flag = False,lemma
     return dstats
     
 
-def calcul_stats(dataframe, names, root_flag = True, stem_flag = False,lemma_flag = False, ):
+def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=False, ):
     """
     Calculer 
     """
     df = dataframe
     #~ # display= data stats
     print('********* ROOT ****************')
-    total = df.shape[0]
+    total = df.shape[0] # row number
     #~ stats_list={}
-    stats_list= []
+    stats_list = []
     for name in names:
-        
+        cpt_stem = df[df.lemma == df[name+"_stem"]][name].count()
         cpt = df[df.root == df[name]][name].count()
         stats_list.append({
         "name":name,
@@ -163,7 +163,7 @@ def calcul_stats(dataframe, names, root_flag = True, stem_flag = False,lemma_fla
         "name":name,
         "method":"stem",
         "average":'micro',
-        "count":cpt,
+        "count":cpt_stem,
         "total":total,
         'Accuracy': accuracy_score(df["lemma"],df[name+"_stem"])*100,
         'F1 score': f1_score(df["lemma"],df[name+"_stem"], average='micro')*100,
@@ -174,7 +174,7 @@ def calcul_stats(dataframe, names, root_flag = True, stem_flag = False,lemma_fla
         "name":name,
         "method":"stem",
         "average":'macro',
-        "count":cpt,
+        "count":cpt_stem,
         "total":total,
         'Accuracy': accuracy_score(df["lemma"],df[name+"_stem"])*100,
         'F1 score': f1_score(df["lemma"],df[name+"_stem"], average='macro')*100,
@@ -205,7 +205,7 @@ def calcul_stats(dataframe, names, root_flag = True, stem_flag = False,lemma_fla
     return dstats
     
     
-def test_stemmers(data_path, names):
+def test_stemmers(dataframe_result, data_path, names, names_to_control):
     """
     """
     for name in names:
@@ -253,14 +253,14 @@ def test_stemmers(data_path, names):
                   encoding = "utf-8")
             df2 = df2.replace(np.nan, '', regex=True)
             asl = abstractstemmer.factory_stemmer.create_stemmer(name);
-            df[name] = df2['root'].apply(asl.getroot)
+            df[name]         = df2['root'].apply(asl.getroot)
             df[name+"_stem"] = df2['root'].apply(asl.getstem)
 
         else:
             
             asl = abstractstemmer.factory_stemmer.create_stemmer(name);
-            df[name]=df["word"].apply(asl.getroot)
-            df[name+"_stem"]=df["word"].apply(asl.getstem)
+            df[name] = df["word"].apply(asl.getroot)
+            df[name+"_stem"] = df["word"].apply(asl.getstem)
         if name in names_to_control:
             df[name+'root eval'] = df["root"] == df[name]            
             df[name+' stem eval'] = df["lemma"] == df[name+'_stem']            
@@ -268,7 +268,7 @@ def test_stemmers(data_path, names):
     return df
 if __name__ == '__main__':
     
-    args =grabargs()
+    args = grabargs()
     filename = args.filename
     outfile = args.outfile
     #~ data_directory = args.data_directory
@@ -304,7 +304,7 @@ if __name__ == '__main__':
     # show conditions
     names_to_control =["assem_stemmer","default","custom-affix"]
     # add features
-    df = test_stemmers(data_path, names)
+    df = test_stemmers(df, data_path, names, names_to_control)
 
     # save file on csv
     df.to_csv(outfile, sep='\t', encoding='utf-8')

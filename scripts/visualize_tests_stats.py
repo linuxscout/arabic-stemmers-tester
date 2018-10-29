@@ -25,7 +25,7 @@ import re
 import argparse
 import os
 import pandas as pd
-from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
+#~ from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -59,12 +59,11 @@ def visualize_latex_string(dtf , caption="", label=""):
         #~ df2 = dtf
     #~ df2 = dtf[dtf['method']==method & dtf['average']==metric_class]
     df2= dtf
-    tex = """
-    \\begin{table} 
-    %s
-    \\caption{%s}
-    \\label{%s:table}
-    \\end{table}""" %(df2.to_latex(bold_rows= True, encoding='utf8'),
+    tex = """\\begin{table} 
+%s
+\\caption{%s}
+\\label{%s:table}
+\\end{table}""" %(df2.to_latex(bold_rows= True, encoding='utf8'),
     caption, label,
     )
     return tex+'\n'
@@ -98,6 +97,7 @@ output file:
     args =grabargs()
     filename = args.filename
     outfile = args.outfile
+    detailed_tables = False
     #~ data_directory = args.data_directory
     all_stemmers = args.all
     # column types
@@ -122,6 +122,8 @@ output file:
         "gold":{'filename':'output/gold.csv.stats',  'desc':"Arabic Golden Corpus"},
         "nafis":{'filename':'output/nafis.unq.stats', 'desc':"NAFIS"},
         "qcorpus":{'filename': 'output/qc.unq.stats', 'desc':"Quranic Arabic Corpus"},
+        "qwc":{'filename': 'output/qwc.csv.stats', 'desc':"Mushaf Corpus"},
+        "kb":{'filename': 'output/kabi.csv.stats', 'desc':"Kabi Corpus"},
     }
     pd.options.display.float_format = '{:,.2f}'.format
     try:
@@ -130,6 +132,17 @@ output file:
         print ("Can't open file %s"%outfile)
         sys.exit()
     frames = []
+    tex_header ="""\\documentclass[12pt]{report}
+\\usepackage[utf8]{inputenc}
+\\usepackage{amsmath}
+\\usepackage{amsfonts}
+\\usepackage{amssymb}
+\\usepackage{graphicx}
+\\usepackage{booktabs}
+\\author{Taha Zerrouki}
+\\begin{document}
+"""
+    outputfile.write(tex_header)
     for key in names:
         filename = names[key]["filename"]
         df = pd.read_csv(filename, delimiter='\t',
@@ -145,35 +158,37 @@ output file:
         frames.append(df)
 
         print df.head(2)
-        mytables=[{'caption'   : "Linguistic Accuracy and Micro classification F1-score on %s dataset "%names[key]["desc"],
-            'label' : "%s-micro"%key,
-            'method':'root', 'average':'micro',
-            },
-            {
-            'caption'   : "Macro classification on %s dataset "%names[key]["desc"],
-            'label' : "%s-macro"%key,
-            'method':'root', 'average':'macro',
-            },
-            {
-            'caption'   : "Stem Extraction evaluation  Micro classification on %s dataset "%names[key]["desc"],
-            'label' : "%s-stmmicro"%key,
+        if detailed_tables:
 
-            'method':'stem', 'average':'micro',            
-            },
-            {
-            'caption'   : "Stem Extraction evaluation  Macro classification on %s dataset "%names[key]["desc"],
-            'label' : "%s-stmmacro"%key,
+            mytables=[{'caption'   : "Linguistic Accuracy and Micro classification F1-score on %s dataset "%names[key]["desc"],
+                'label' : "%s-micro"%key,
+                'method':'root', 'average':'micro',
+                },
+                {
+                'caption'   : "Macro classification on %s dataset "%names[key]["desc"],
+                'label' : "%s-macro"%key,
+                'method':'root', 'average':'macro',
+                },
+                {
+                'caption'   : "Stem Extraction evaluation  Micro classification on %s dataset "%names[key]["desc"],
+                'label' : "%s-stmmicro"%key,
 
-            'method':'stem', 'average':'macro',
-            },
-            ]
-        for mytab in mytables:
-            outputfile.write("%% test of %s\n"%key)    
-            caption   = "Linguistic Accuracy and Micro classification F1-score on %s dataset "%names[key]["desc"]
-            label = "%s-micro"%key
-            df_c = df[(df.method ==mytab['method'])&(df['average'] == mytab['average'])]
-            tex = visualize_latex_string( df_c, mytab['caption'], mytab['label'])
-            outputfile.write(tex)
+                'method':'stem', 'average':'micro',            
+                },
+                {
+                'caption'   : "Stem Extraction evaluation  Macro classification on %s dataset "%names[key]["desc"],
+                'label' : "%s-stmmacro"%key,
+
+                'method':'stem', 'average':'macro',
+                },
+                ]
+            for mytab in mytables:
+                outputfile.write("%% test of %s\n"%key)    
+                caption   = "Linguistic Accuracy and Micro classification F1-score on %s dataset "%names[key]["desc"]
+                label = "%s-micro"%key
+                df_c = df[(df.method ==mytab['method'])&(df['average'] == mytab['average'])]
+                tex = visualize_latex_string( df_c, mytab['caption'], mytab['label'])
+                outputfile.write(tex)
 
 
     # merge all data to build a pivot table
@@ -221,6 +236,8 @@ output file:
         plt.savefig("output/images/%s.png"%label)  
         df_pivot.to_csv("output/pivots/%s.csv"%label, sep='\t',encoding='utf8')
 
+    tex_footer =u"""\\end{document}"""
+    outputfile.write(tex_footer)
     df_global.to_csv("output/global.stats.csv", sep='\t', encoding='utf8')
     print("Global Stats are stored in output/global.stats.csv")
     print("Pivots tables Stats are stored in output/pivots/*.csv")

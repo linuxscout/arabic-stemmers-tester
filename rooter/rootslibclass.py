@@ -121,17 +121,25 @@ class rootDict:
     def extend_root(psudoroot, wazn =""):
         """ extend a psudo root"""
         extended = []
-        # cpnvert ALEF to WAW or YEH
-        extended.append(psudoroot.replace(araby.ALEF, araby.WAW))
-        extended.append(psudoroot.replace(araby.ALEF, araby.YEH))
+        # convert ALEF to WAW or YEH
+        if araby.ALEF in psudoroot:
+            extended.append(psudoroot.replace(araby.ALEF, araby.WAW))
+            extended.append(psudoroot.replace(araby.ALEF, araby.YEH))
+        #~ if len(psudoroot) == 3 and araby.YEH in psudoroot:
+            #~ extended.append(psudoroot.replace(araby.YEH, araby.WAW))
+        #~ if len(psudoroot) == 3 and araby.WAW in psudoroot:
+            #~ extended.append(psudoroot.replace(araby.WAW, araby.YEH))
+            #~ extended.append(psudoroot.replace(araby.ALEF, araby.YEH))
         # extend root according to length,
         # if wazn (rooton) is given we can know where to add missed letter
         if not wazn:
+            if psudoroot in (u'خذ',u'مر',u'كل'):
+                extended.append(araby.HAMZA + psudoroot)
             if len(psudoroot) == 2:
                 # add Yeh or waw at begin
                 extended.append(araby.WAW + psudoroot)
                 #~ extended.append(araby.YEH + psudoroot)
-                extended.append(araby.HAMZA + psudoroot)
+                #~ extended.append(araby.HAMZA + psudoroot)
                 # add Yeh or waw at middle
                 extended.append("".join([psudoroot[0],araby.WAW, psudoroot[1]]))
                 extended.append("".join([psudoroot[0],araby.YEH, psudoroot[1]]))
@@ -348,94 +356,111 @@ class rootDict:
                 if root:
                   accepted_wazns.append(root)
                   # extend roots to add removed letters according to wazn              
-                  extended = self.extend_root(root, wazn)  
+                  extended = self.extend_root(root, wazn)
+                  
                   accepted_wazns.extend(extended)
                   if self.debug:
                       print(u"\t".join([starword, wazn,root, u";".join(extended)]).encode('utf8'))
         return accepted_wazns
 
     @staticmethod
-    def filter_root_length(roots):
-        return [x for x in roots if len(x) >= 3 and len(x)<=4]
+    def filter_root_length_valid(roots):
+        
+        return [x for x in roots if len(x) >= 3 and len(x)<=4 and araby.ALEF not in x]
     
     @staticmethod    
-    def debug_algo(debug, level, name, roots, roots_tmp, accepted):
+    def debug_algo(debug, word,  level, name, candidats, roots, roots_tmp, accepted):
         if debug:
-            print("*** Level %d: %s"%(level,name))
+            print((u"*** Level %d: [%s] %s "%(level,name, word)).encode('utf8'))
+            print("   Candidats    :", u"\t".join(candidats).encode('utf8'))
             print("   roots    :", u"\t".join(roots).encode('utf8'))
             print("   roots tmp:", u"\t".join(roots_tmp).encode('utf8'))
             print("   accepted :", u"\t".join(accepted).encode('utf8'))
         
-    def choose_root(self, affixation_list, debug = False):
+    def choose_root(self, word, affixation_list, debug = False):
         """ test an algorithm to choose roots"""
         accepted = []
+        all_accepted = []
+        
+        # if all algo, all algorithms will be tested over roots
+        # we think to test all algorithms then get the most common root
+        # the secnd way when all_algorithms is false, we use if else to get the given root, and stop when we can get one at least
+        all_algo = True
         #roots
         stems = [ self.normalize_root(d['stem']) for d in affixation_list]
         roots = [ self.normalize_root(d['root']) for d in affixation_list]
-        if not accepted:
+        if all_algo or not accepted:
 
             # get uniq root
             #~ accepted = list(set(filter(.is_root, roots)))
             # avoid non 3-4 letters roots
-            roots_tmp =  self.filter_root_length(roots)
+            roots_tmp =  self.filter_root_length_valid(roots)
             # lookup for real roots
             accepted = filter( self.is_root, roots_tmp)
-            self.debug_algo(debug, 1 , "default", roots, roots_tmp, accepted)
+            self.debug_algo(debug, word, 1 , "default", roots, roots, roots_tmp, accepted)
+            # to handle all accepted together
+            all_accepted.extend(accepted)
 
         # Stems as roots
-        if not accepted:
+        if all_algo or not accepted:
 
             # avoid non 3-4 letters roots
-            roots_tmp =  self.filter_root_length(stems)
+            roots_tmp =  self.filter_root_length_valid(stems)
             # lookup for real roots
             accepted = filter( self.is_root, roots_tmp)
-            self.debug_algo(debug, 1 , "default", stems, roots_tmp, accepted)
+            all_accepted.extend(accepted)            
+            self.debug_algo(debug, word, 2 , "default as stem", stems, stems, roots_tmp, accepted)
 
         # Virtual roots
-        if not accepted :#and False:
+        if all_algo or not accepted :#and False:
             # try to virtualize roots
             virtual_roots = []
             #~ for x in roots:
-            candidat_stems =  self.filter_root_length(stems)
+            candidat_stems =  [x for x in stems if len(x) >= 3 and len(x)<=4]
+            # virtual roots will be applied on roots also
+            candidat_stems.extend(roots)
             for x in stems:
-                virtual_roots.extend( self.is_virtual_root(x))
-            roots_tmp =  self.filter_root_length(virtual_roots)
+                virtual_roots.extend(self.is_virtual_root(x))
+            roots_tmp =  self.filter_root_length_valid(virtual_roots)
             # lookup for real roots
             #~ accepted = filter(is_root, roots_tmp)
             accepted = roots_tmp
-            self.debug_algo(debug, 5, "virtual roots", virtual_roots, roots_tmp, accepted)
+            all_accepted.extend(accepted)
+            self.debug_algo(debug, word, 3, "virtual roots", candidat_stems, virtual_roots, roots_tmp, accepted)
 
 
         # Tiny Scheme extraction
-        if not accepted:
+        if all_algo or not accepted:
             # try to extract roots from stems
 
             wazn_roots = []
             for x in stems:
-                wazn_roots.extend( self.valid_starstem(x))
+                wazn_roots.extend(self.valid_starstem(x))
             #~ accepted = filter(.is_root, ampted_roots )
-            roots_tmp =  self.filter_root_length(wazn_roots)
+            roots_tmp =  self.filter_root_length_valid(wazn_roots)
             # lookup for real roots
             accepted = filter( self.is_root, roots_tmp)
+            all_accepted.extend(accepted)
             #~ accepted = roots_tmp
-            self.debug_algo(debug, 2, "stem scheme roots", wazn_roots, roots_tmp, accepted)
+            self.debug_algo(debug, word, 4, "Rhyzome roots", stems, wazn_roots, roots_tmp, accepted)
 
 
 
         # Extending roots
-        if not accepted:
+        if all_algo or not accepted:
         #~ if False :#not accepted:
             # try to extend roots
             extended_roots = []
             for x in roots:
                 extended_roots.extend( self.extend_root(x))
-            roots_tmp =  self.filter_root_length(extended_roots)
+            roots_tmp =  self.filter_root_length_valid(extended_roots)
             # lookup for real roots
             accepted = filter( self.is_root, roots_tmp)
-            self.debug_algo(debug, 3, "extended roots", extended_roots, roots_tmp, accepted)
+            all_accepted.extend(accepted)            
+            self.debug_algo(debug, word, 5, "extended roots", roots, extended_roots, roots_tmp, accepted)
 
         # stamped roots
-        if not accepted:
+        if all_algo or not accepted:
         #~ if False :#not accepted:
             # try to extend roots
             stamped_roots = []
@@ -443,14 +468,17 @@ class rootDict:
             for x in stems:
                 stamped_roots.extend( self.is_stamped_root(x))
             #~ accepted = filter(is_root, sampted_roots )
-            roots_tmp =  self.filter_root_length(stamped_roots)
+            roots_tmp =  self.filter_root_length_valid(stamped_roots)
             #don't need to filter roots because stamps do it
             # lookup for real roots
             #~ accepted = filter(is_root, roots_tmp)
             accepted = roots_tmp
-            self.debug_algo(debug, 4, "stamped roots", stamped_roots, roots_tmp, accepted)
+            all_accepted.extend(accepted)            
+            self.debug_algo(debug, word, 6, "stamped roots", stems, stamped_roots, roots_tmp, accepted)
 
-        if accepted:
+        if all_algo and all_accepted: 
+            return  self.most_common(all_accepted)
+        elif accepted:
             #select tri-letter before selecting 4 letters
             return  self.most_common(accepted)
         else:
@@ -468,11 +496,11 @@ class rootDict:
         for x in stems:
             wazn_roots.extend( self.valid_starstem(x))
         #~ accepted = filter(.is_root, ampted_roots )
-        roots_tmp =  self.filter_root_length(wazn_roots)
+        roots_tmp =  self.filter_root_length_valid(wazn_roots)
         # lookup for real roots
         accepted = filter( self.is_root, roots_tmp)
         #~ accepted = roots_tmp
-        self.debug_algo(debug, 2, "stem scheme roots", wazn_roots, roots_tmp, accepted)    
+        self.debug_algo(debug, 2, "stem scheme roots", stems,wazn_roots, roots_tmp, accepted)    
 
         return accepted
 def test1(args):
@@ -568,7 +596,8 @@ def test2():
         seg_list = asl.get_segment_list()  
         starstem_list =[]
         affixa_list = asl.get_affix_list()
-        root_result = choose_root(affixa_list, debug=True)
+        #~ root_result = choose_root(affixa_list, debug=True)
+        root_result = choose_root(word, affixa_list, debug=True)
         print(root_result, root_result == root)
     return 0
 
@@ -585,16 +614,151 @@ def test3():
     asl = ArabicLightStemmer() 
     rooter = rootDict()       
     words = [(u'أفتضاربانني',u'ضرب'),
-    (u'بأبأ',u'بءبء'),
-    (u'يسعى',u'سعى'),
-    (u'يريدون',u'ريد'),
-    (u'يستطعن', u'ريد'),
-    (u'كتاب',u'كتب'),
-    (u"بالميدان",u'ميد'),
-    (u"بالأسيهم",u'سهم'),
-    (u"آخرين",u'ءخر'),
-    (u"بالأخرة",u'ءخر'),
-    
+    #~ (u'بأبأ',u'بءبء'),
+    #~ (u'يسعى',u'سعى'),
+    #~ (u'يريدون',u'ريد'),
+    #~ (u'يستطعن', u'ريد'),
+    #~ (u'كتاب',u'كتب'),
+    #~ (u"بالميدان",u'ميد'),
+    #~ (u"بالأسيهم",u'سهم'),
+    #~ (u"آخرين",u'ءخر'),
+    #~ (u"بالأخرة",u'ءخر'),
+    #~ ('ويرمي',u'رمي'),
+#~ (u'ويرمي',u'رمي'),
+#~ (u'يرمون',u'رمي'),
+#~ (u'راميات',u'رمي'),
+#~ (u'وترمون',u'رمي'),
+#~ (u'ويرمين',u'رمي'),
+#~ (u'وترميان',u'رمي'),
+#~ (u'ورامون',u'رمي'),
+#~ (u'وليرميان',u'رمي'),
+#~ (u'لترميان',u'رمي'),
+#~ (u'لترمين',u'رمي'),
+#~ (u'رامي',u'رمي'),
+#~ (u'ورامي',u'رمي'),
+#~ (u'رماية',u'رمي'),
+#~ (u'رمايه',u'رمي'),
+#~ (u'الراميات',u'رمي'),
+#~ (u'المرميات',u'رمي'),
+#~ (u'المتراميات',u'رمي'),
+#~ (u'مترامية',u'رمي'),
+#~ (u'مترامي',u'رمي'),
+#~ (u'الرامون',u'رمي'),
+#~ (u'والراميات',u'رمي'),
+#~ (u'وسيقولون',u'قول'),
+#~ (u'وسيقال',u'قول'),
+#~ (u'وسيقيلوهم',u'قول'),
+#~ (u'وتقال',u'قول'),
+#~ (u'وتقولوا',u'قول'),
+#~ (u'وتقول',u'قول'),
+#~ (u'ومقاول',u'قول'),
+#~ (u'وقالوا',u'قول'),
+#~ (u'ومقال',u'قول'),
+
+(u'وتقل', u'قول'),
+(u'وتقلن', u'قول'),
+(u'وليقل', u'قول'),
+(u'ولتقلنا', u'قول'),
+(u'لتقل', u'قول'),
+(u'تقل', u'قول'),
+(u'ونقل', u'قول'),
+(u'ولنقل', u'قول'),
+(u'فتقل', u'قول'),
+(u'ستقل', u'قول'),
+(u'ستقلن', u'قول'),
+(u'وستقلن', u'قول'),
+(u'فستقل', u'قول'),
+
+(u'وقالوا', u'قول'),
+(u'قالوا', u'قول'),
+(u'وقالا', u'قول'),
+(u'قالا', u'قول'),
+(u'وقالت', u'قول'),
+(u'قالت', u'قول'),
+(u'ويقال', u'قول'),
+(u'يقال', u'قول'),
+(u'وسيقال', u'قول'),
+(u'سيقال', u'قول'),
+(u'ويقلن', u'قول'),
+(u'يقلن', u'قول'),
+(u'ويقلنا', u'قول'),
+(u'يقلنا', u'قول'),
+(u'وتقال', u'قول'),
+(u'تقال', u'قول'),
+(u'وقال', u'قول'),
+(u'قال', u'قول'),
+(u'وسأقول', u'قول'),
+(u'سأقول', u'قول'),
+(u'وقائل', u'قول'),
+(u'قائل', u'قول'),
+(u'وقائلان', u'قول'),
+(u'قائلان', u'قول'),
+(u'وقائلون', u'قول'),
+(u'قائلون', u'قول'),
+(u'وقائلا', u'قول'),
+(u'قائلا', u'قول'),
+(u'ومقال', u'قول'),
+(u'مقال', u'قول'),
+(u'وقائلتان', u'قول'),
+(u'قائلتان', u'قول'),
+(u'يعد', u'وعد'),
+(u'تعد', u'عدد'),
+(u'نعدهم', u'عدد'),
+(u'وتعدهم',u'وعد'),
+(u'تعدهم',u'وعد'),
+(u'وستعدهم',u'وعد'),
+(u'ستعدهم',u'وعد'),
+(u'وتعدهما',u'وعد'),
+(u'تعدهما',u'وعد'),
+(u'ويعدهم',u'وعد'),
+(u'يعدهم',u'وعد'),
+(u'ويعدهما',u'وعد'),
+(u'يعدهما',u'وعد'),
+(u'وسيعدهم',u'وعد'),
+(u'سيعدهم',u'وعد'),
+(u'وسيعدهما',u'وعد'),
+(u'سيعدهما',u'وعد'),
+(u'ولنعدهم',u'وعد'),
+(u'لنعدهم',u'وعد'),
+(u'ولنعدهما',u'وعد'),
+(u'لنعدهما',u'وعد'),
+(u'ولتعدهم',u'وعد'),
+(u'لتعدهم',u'وعد'),
+(u'ولتعدهما',u'وعد'),
+(u'لتعدهما',u'وعد'),
+(u'ولتعدها',u'وعد'),
+(u'لتعدها',u'وعد'),
+(u'وستعدها',u'وعد'),
+(u'ستعدها',u'وعد'),
+(u'ووعدها',u'وعد'),
+(u'وعدها',u'وعد'),
+(u'ووعدهم',u'وعد'),
+(u'وعدهم',u'وعد'),
+(u'ووعدهما',u'وعد'),
+(u'وعدهما',u'وعد'),
+(u'وتعد',u'وعد'),
+(u'تعد',u'وعد'),
+(u'وتعدني',u'وعد'),
+(u'تعدني',u'وعد'),
+(u'وتعدنا',u'وعد'),
+(u'تعدنا',u'وعد'),
+(u'وتعده',u'وعد'),
+(u'تعده',u'وعد'),
+(u'وواعدناهم',u'وعد'),
+(u'واعدناهم',u'وعد'),
+(u'ووعدناهم',u'وعد'),
+(u'وعدناهم',u'وعد'),
+(u'وتعدوهم',u'وعد'),
+(u'تعدوهم',u'وعد'),
+(u'يعتاد',u'عود'),
+(u'أحست',u'حسس'),
+(u'يحسون',u'حسس'),
+(u'ثقة',u'وثق'),
+(u'ثقات',u'وثق'),
+(u'بثقات',u'وثق'),
+(u'صفات',u'وصف'),
+(u'صلاته',u'وصل'),
+
     ]
     for word, root in words:
         print((u"**********%s*********"%word).encode('utf8'))
@@ -604,8 +768,11 @@ def test3():
         seg_list = asl.get_segment_list()  
         starstem_list =[]
         affixa_list = asl.get_affix_list()
-        root_result = rooter.choose_wazn_root(affixa_list, debug=True)
-        print(root_result, root_result == root)
+        stems = [ d['stem'] for d in affixa_list]
+        print(u' '.join(stems).encode('utf8'))
+        #~ root_result = rooter.choose_wazn_root(affixa_list, debug=True)
+        root_result = rooter.choose_root(word, affixa_list, debug=True)
+        print("Test root",root_result.encode('utf8'), "found root",root_result.encode('utf8'), root_result == root)
     # test root_extension
     roots=[u"قل",
     u"دع",

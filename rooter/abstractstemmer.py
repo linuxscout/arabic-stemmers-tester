@@ -31,6 +31,8 @@ import snowballstemmer.arabic_stemmer
 import snowballstemmer_modified.arabic_stemmer 
 import naftawayh.wordtag
 from stopwords.arabicstopwords import is_stop, stop_stem, stop_root
+from pyarabic.arabrepr import arepr
+import lemmatizer
 #~ CUSTOM_PREFIX_LIST = [u'كال', u'أفبال', u'أفك', u'فك', u'أولل', u'', u'أف', u'ول', u'أوال', u'ف', u'و', u'أو', u'ولل', u'فب', u'أول', u'ألل', u'لل', u'ب', u'وكال', u'أوب', u'بال', u'أكال', u'ال', u'أب', u'وب', u'أوبال', u'أ', u'وبال', u'أك', u'فكال', u'أوك', u'فلل', u'وك', u'ك', u'أل', u'فال', u'وال', u'أوكال', u'أفلل', u'أفل', u'فل', u'أال', u'أفكال', u'ل', u'أبال', u'أفال', u'أفب', u'فبال']
 #~ CUSTOM_SUFFIX_LIST = [u'كما', u'ك', u'هن', u'ي', u'ها', u'', u'ه', u'كم', u'كن', u'هم', u'هما', u'نا']
 CUSTOM_SUFFIX_LIST = absconst.STEMMING_SUFFIX_LIST
@@ -61,6 +63,7 @@ class abstractStemmer(tashaphyne.stemming.ArabicLightStemmer):
                         "root_dict":"no",
                         "stop_words":"no",
         }
+        self.debug_root = False
     def help(self,):
         return repr(self.config)
     def getstem(self, word):
@@ -74,6 +77,37 @@ class abstractStemmer(tashaphyne.stemming.ArabicLightStemmer):
         pass
     def verify_roots(self, root_list):
         pass
+        
+#Define an abstract Class for stemmer
+class multiStemmer(abstractStemmer):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        tashaphyne.stemming.ArabicLightStemmer.__init__(self)
+        self.config = {"affix":"default",
+                        "root_dict":"no",
+                        "stop_words":"no",
+        }
+    def help(self,):
+        return repr(self.config)
+    def getstem(self, word):
+        """ get a stem from word"""
+        self.light_stem(word)
+        self.segment(word)
+        affixation_list = self.get_affix_list()
+        stems = [ d['stem'] for d in affixation_list]
+        stems = list(set(stems))
+        stems = u";".join(stems)
+        return stems
+    def getroot(self, word):
+        """ get a stem from word"""
+        self.light_stem(word)
+        self.segment(word)
+        affixation_list = self.get_affix_list()
+        roots = [ d['root'] for d in affixation_list]
+        roots = list(set(roots))
+        roots = u";".join(roots)
+        return roots
+
         
 class customStemmer(abstractStemmer):
     """ I will make more options for stemmer """
@@ -113,6 +147,126 @@ class customStemmer_affix_stp(abstractStemmer):
         """ get a stem from word"""
         self.light_stem(word)
         return self.get_root()
+
+class customStemmer_lemmatizer(abstractStemmer):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        abstractStemmer.__init__(self)
+        #set 
+        self.set_prefix_list(CUSTOM_PREFIX_LIST)
+        self.set_suffix_list(CUSTOM_SUFFIX_LIST)
+        self.config["affix"] = "custom"
+        self.debug = False
+        self.lemmatizer = lemmatizer.lemmaDict()
+        
+    def getstem(self,word):
+        """ get a stem from word"""
+        if not is_stop(word):
+            word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+            self.light_stem(word)
+            self.segment(word)
+            affixation_list = self.get_affix_list()
+            # filter valid affixes
+            affixation_list = filter(self.verify_affix, affixation_list)
+
+            return self.lemmatizer.choose_stem(affixation_list)
+        else:
+            return stop_stem(word)
+    
+        
+    def log(self, data, msg=""):
+        """ display internal data"""
+        if not self.debug:
+            return False
+        print(msg)
+        print(arepr(data))
+    def getroot(self,word):
+        """ get a stem from word"""
+        self.light_stem(word)
+        return self.get_root()
+    def verify_affix(self, affix_tuple):
+        #مراجعة مبسطة
+        # أل التعريف مع ضمير متصل
+        prefix = affix_tuple.get('prefix', '')
+        suffix = affix_tuple.get('suffix', '')
+        if ((u"ال" in prefix or u"لل" in prefix) and 
+            (u'ه' in suffix or u'ك' in suffix)
+            ):
+                return False
+        # حروف الجر مع واو جمع مذكر سالم
+        #ولمثنى المرفوع
+        if ((u"ك" in prefix or u"ب" in prefix or u"لل" in prefix) and 
+            (u'و' in suffix or u'ان' in suffix)
+            ):
+                return False
+        return True        
+class customStemmer_lemmatizer_tag(abstractStemmer):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        abstractStemmer.__init__(self)
+        #set 
+        self.set_prefix_list(CUSTOM_PREFIX_LIST)
+        self.set_suffix_list(CUSTOM_SUFFIX_LIST)
+        self.config["affix"] = "custom"
+        self.debug = False
+        self.lemmatizer = lemmatizer.lemmaDict()
+        # tagger
+        self.tagger = naftawayh.wordtag.WordTagger(); 
+        # noun stemmer config
+        # create stemmer
+        self.noun_stemmer = abstractStemmer()
+        # config prefix and suffix list
+        self.noun_stemmer.set_prefix_list(NOUN_PREFIX_LIST)
+        self.noun_stemmer.set_suffix_list(NOUN_SUFFIX_LIST)
+        # verb stemmer config
+        # create stemmer
+        self.verb_stemmer = abstractStemmer()
+        # config prefix and suffix list
+        self.verb_stemmer.set_prefix_list(VERB_PREFIX_LIST)
+        self.verb_stemmer.set_suffix_list(VERB_SUFFIX_LIST)             
+        
+    def getstem(self,word):
+        """ get a stem from word"""
+        if not is_stop(word):
+            word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+            self.light_stem(word)
+            self.segment(word)
+            affixation_list = self.get_affix_list()
+            # filter valid affixes
+            affixation_list = filter(self.verify_affix, affixation_list)
+
+            return self.lemmatizer.choose_stem(affixation_list)
+        else:
+            return stop_stem(word)
+    
+        
+    def log(self, data, msg=""):
+        """ display internal data"""
+        if not self.debug:
+            return False
+        print(msg)
+        print(arepr(data))
+    def getroot(self,word):
+        """ get a stem from word"""
+        self.light_stem(word)
+        return self.get_root()
+    def verify_affix(self, affix_tuple):
+        #مراجعة مبسطة
+        # أل التعريف مع ضمير متصل
+        prefix = affix_tuple.get('prefix', '')
+        suffix = affix_tuple.get('suffix', '')
+        if ((u"ال" in prefix or u"لل" in prefix) and 
+            (u'ه' in suffix or u'ك' in suffix)
+            ):
+                return False
+        # حروف الجر مع واو جمع مذكر سالم
+        #ولمثنى المرفوع
+        if ((u"ك" in prefix or u"ب" in prefix or u"لل" in prefix) and 
+            (u'و' in suffix or u'ان' in suffix)
+            ):
+                return False
+        return True        
+
 
 class customStemmer_stp(abstractStemmer):
     """ I will make more options for stemmer """
@@ -154,12 +308,12 @@ class customStemmer_roots(abstractStemmer):
             word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
             self.light_stem(word)
             self.segment(word)
-            affixation_list= self.get_affix_list()
+            affixation_list = self.get_affix_list()
             # filter valid affixes
             affixation_list = filter(self.verify_affix, affixation_list)
 
             #~ root_result = rootslib.choose_root(affixation_list)
-            root_result = self.rootdict.choose_root(affixation_list)
+            root_result = self.rootdict.choose_root(word, affixation_list, self.debug_root)
             if root_result:
                 return root_result
             else:
@@ -184,6 +338,32 @@ class customStemmer_roots(abstractStemmer):
                 return False
         return True
         
+class rootStemmer(abstractStemmer):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        abstractStemmer.__init__(self,)
+        self.rootdict = rootslibclass.rootDict()
+        pass
+    def getstem(self,word):
+        """ get a stem from word"""
+        return word
+    def getroot(self,word):
+        """ get a root from word"""
+
+        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+        stem = self.getstem(word)
+        affixation_list= [{'prefix':'',
+                'suffix':'',
+                'root':stem,
+                'stem':stem,
+                },
+                ]
+        root_result = self.rootdict.choose_root(word, affixation_list)
+        if root_result:
+            return root_result
+        else:
+            return stem 
+
 class customStemmer_tag_root(abstractStemmer):
     """ I will make more options for stemmer """
     def __init__(self,):
@@ -251,7 +431,7 @@ class customStemmer_tag_root(abstractStemmer):
             #~ affixation_list = filter(self.verify_affix, affixation_list)
 
             #~ root_result = rootslib.choose_root(affixation_list)
-            root_result = self.rootdict.choose_root(affixation_list)
+            root_result = self.rootdict.choose_root(word, affixation_list)
             if root_result:
                 return root_result
             else:
@@ -380,7 +560,7 @@ class abstractIsri_custom(ISRIStemmer):
                     'stem':stem,
                     },
                     ]
-            root_result = self.rootdict.choose_root(affixation_list)
+            root_result = self.rootdict.choose_root(word, affixation_list)
             if root_result:
                 return root_result
             else:
@@ -410,7 +590,7 @@ class abstractAssem_custom(snowballstemmer.arabic_stemmer.ArabicStemmer):
                     'stem':stem,
                     },
                     ]
-            root_result = self.rootdict.choose_root(affixation_list)
+            root_result = self.rootdict.choose_root(word, affixation_list)
             if root_result:
                 return root_result
             else:
@@ -439,7 +619,7 @@ class abstractKhoja_custom(abstractStemmer):
                 'stem':stem,
                 },
                 ]
-        root_result = self.rootdict.choose_root(affixation_list)
+        root_result = self.rootdict.choose_root(word, affixation_list)
         if root_result:
             return root_result
         else:
@@ -465,7 +645,7 @@ class abstractFarasa_custom(abstractStemmer):
                 'stem':stem,
                 },
                 ]
-        root_result = self.rootdict.choose_root(affixation_list)
+        root_result = self.rootdict.choose_root(word, affixation_list)
         if root_result:
             return root_result
         else:
@@ -520,6 +700,9 @@ class factory_stemmer(object):
         "custom-affix-stp",
         "custom-root",
         "custom-stp",
+        "rooter-only",
+        "multi",
+        "lemmatizer",
         ]
         return namelist
     @staticmethod
@@ -562,6 +745,12 @@ class factory_stemmer(object):
             asl = customStemmer_tag()
         elif name == "custom-stp":
             asl = customStemmer_stp()
+        elif name == "rooter-only":
+            asl = rootStemmer()
+        elif name == "multi":
+            asl = multiStemmer()
+        elif name == "lemmatizer":
+            asl = customStemmer_lemmatizer()
         else:
             """ no options"""
             asl = abstractStemmer()            
@@ -575,13 +764,24 @@ class factory_stemmer(object):
     
 def main(args):
     word = u"يستعملونهم"
+    words = [u"بساكنيها", u"وسواكنها",u"يستعملونها", u"يندرجون",
+    u'ينتقي',
+    u"يقترب",
+    u"يغتر",
+    u"يستمر",  
+    u"يستهينهم",
+    u'ويستنفرهم', u'ويستعملهم', u'ويستقدمهم', u'ويستهينهم', u'ويستغلهم', u'ويستعلمهم', u'ويستفزهم', u'يطعهم', u'يستملهم', u'ويطعهم', u'ويستملهم', u'ويستميلهم', u'ويستحمهم', u'ويستحلهم', u'ويستحييهم', u'ويستدرجهم', u'ويستطرقهم', u'ويستنصرهم', u'ويستصرخهم', u'ويستعطفهم', u'ويستنكحهم', u'ويستنزفهم', u'ويستكهلكه'      
     
-    for name in ('default', 'custom', 'isri', 'assem'):
-    #~ for name in ('default', 'custom'):
-        asl = factory_stemmer.create_stemmer(name);
-        print("%s Stemmer"%name)
-        print asl.getstem(word)
-        print asl.getroot(word)
+    ]
+
+    #~ for name in ('default', 'custom', 'isri', 'assem'):
+    print(u'\t'.join(['stemmer','word', 'root', 'stem' ]))
+    #~ names = factory_stemmer.get_stemmers()
+    names = ['lemmatizer']
+    for word in words: 
+        for name in names:
+            asl = factory_stemmer.create_stemmer(name);
+            print(u'\t'.join([name,word, asl.getroot(word), asl.getstem(word) ]).encode('utf8'))
     return 0
 
 if __name__ == '__main__':

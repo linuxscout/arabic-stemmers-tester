@@ -50,14 +50,14 @@ def calcul_stats(dataframe,name):
     stats_list={}
     stats_list[name]={
     #~ "name":name,
-    "count":total,
-    "uniq roots":df['root'].nunique(),
-    "uniq lemmas":df['lemma'].nunique(),
-    "uniq words":df['word'].nunique(),
-    "mean words by root":df[['word','root']].groupby('root').count().mean(),
-    "min words by root":df[['word','root']].groupby('root').count().min(),
-    "max words by root":df[['word','root']].groupby('root').count().max(),
-    "mean words by lemmas":df[['word','lemma']].groupby('lemma').count().mean(),
+    "Count":total,
+    "Uniq roots":df['root'].nunique(),
+    "Uniq lemmas":df['lemma'].nunique(),
+    "Uniq words":df['word'].nunique(),
+    "Mean words by root":df[['word','root']].groupby('root').count().mean(),
+    "Min words by root":df[['word','root']].groupby('root').count().min(),
+    "Max words by root":df[['word','root']].groupby('root').count().max(),
+    "Mean words by lemmas":df[['word','lemma']].groupby('lemma').count().mean(),
     }
 
     dstats = pd.DataFrame.from_dict(stats_list, orient='index')
