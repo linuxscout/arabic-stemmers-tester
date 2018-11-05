@@ -90,11 +90,15 @@ qwc:DATA=${DATA_QWC}
 kb:DATA=${DATA_KB}
 # test all datasets with all stemmers
 #~ test_all_data: OPTIONS=--all
+test_all_data:OPTIONS=
 test_all_data:test_all
+test_all:OPTIONS=
 test_all: test words test_some gold quranic_corpus qc quran_index qi nafis qwc kb
 
 # test some stemmers
+# only mentioned stemmers 
 test_some:OPTIONS=
+test_some:test_all
 
 
 test words test_some gold quranic_corpus qc quran_index qi nafis qwc kb:
@@ -111,7 +115,9 @@ eval_qwc:DATA=${DATA_QWC}
 eval_kb:DATA=${DATA_KB}
 
 # eval all stemmers
-eval_all:OPTIONS=--all
+#~ eval_all:OPTIONS=--all
+eval_some:OPTIONS=
+eval_some:eval_all
 eval_all:eval_qc eval_gold  eval_qi eval_nafis eval_qwc eval_kb
 eval eval_quranic_corpus eval_qc eval_gold eval_quran_index eval_qi eval_nafis eval_qwc eval_kb:
 	# test stemmers with quran index dataset
@@ -145,3 +151,11 @@ debug_qwc_win:
 	python scripts\test_rooters_debug.py -f samples\qwc.csv -o output\qwc.debug.csv > output\qwc.debug
 debug_win:
 	python scripts\test_rooters_debug.py -f samples\words_debug.csv -o output\word_debug.csv > output\words.debug
+
+
+matrix:
+	python scripts/test_root_matrix.py -f samples/words_debug.csv -o output/word_debug.csv > output/words.matrix 
+matrix_qwc:
+	python scripts/test_root_matrix.py -f samples/qwc.csv -o output/qwc_debug.csv > output/qwc.matrix 
+qalsadi:
+	python scripts/test_analex.py > output/text.txt

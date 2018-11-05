@@ -299,7 +299,27 @@ if __name__ == '__main__':
         names.extend(['khoja','farasa'])
         #~ names = ('default', 'custom',  'isri',"assem", "khoja","farasa", 'custom_stp', 'custom_roots')
     else:
-        names = ("khoja", "khoja+rooter", "farasa+rooter", 'farasa')
+        names =["default",
+        #~ "custom-tag-root",
+        #~ "custom-tag",
+        "isri",
+        "khoja",
+        "farasa",
+        #~ "isri+rooter",
+        "assem",
+        #~ "assem-stemmer",
+        #~ "assem+rooter",
+        #~ "khoja+rooter",
+        #~ "farasa+rooter",
+        #~ "custom-affix",
+        #~ "custom-affix-stp",
+        "custom-root",
+        "custom-root-matrix",
+        #~ "custom-stp",
+        #~ "rooter-only",
+        #~ "multi",
+        #~ "lemmatizer",
+        ]
     # add some stemmers to be controled under csv file 
     # show conditions
     names_to_control =["assem_stemmer","default","custom-affix"]

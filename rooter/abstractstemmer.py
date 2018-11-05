@@ -291,6 +291,8 @@ class customStemmer_roots(abstractStemmer):
     """ I will make more options for stemmer """
     def __init__(self,):
         abstractStemmer.__init__(self)
+        infixes_letters_custom = u"توطيدا"
+        self.set_infix_letters(infixes_letters_custom)
         self.config["root_dict"] = "yes"
         #~ rootslib.create_stamped_roots()
         #~ rootslib.create_virtual_roots()
@@ -314,6 +316,59 @@ class customStemmer_roots(abstractStemmer):
 
             #~ root_result = rootslib.choose_root(affixation_list)
             root_result = self.rootdict.choose_root(word, affixation_list, self.debug_root)
+            if root_result:
+                return root_result
+            else:
+                return self.get_root()
+
+        else:
+            return stop_root(word)
+    def verify_affix(self, affix_tuple):
+        #مراجعة مبسطة
+        # أل التعريف مع ضمير متصل
+        prefix = affix_tuple.get('prefix', '')
+        suffix = affix_tuple.get('suffix', '')
+        if ((u"ال" in prefix or u"لل" in prefix) and 
+            (u'ه' in suffix or u'ك' in suffix)
+            ):
+                return False
+        # حروف الجر مع واو جمع مذكر سالم
+        #ولمثنى المرفوع
+        if ((u"ك" in prefix or u"ب" in prefix or u"لل" in prefix) and 
+            (u'و' in suffix or u'ان' in suffix)
+            ):
+                return False
+        return True
+        
+class customStemmer_roots_matrix(abstractStemmer):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        abstractStemmer.__init__(self)
+        infixes_letters_custom = u"توطيدا"
+        self.set_infix_letters(infixes_letters_custom)
+        self.config["root_dict"] = "yes"
+        #~ rootslib.create_stamped_roots()
+        #~ rootslib.create_virtual_roots()
+        self.rootdict = rootslibclass.rootDict()
+    
+    def getstem(self,word):
+        """ get a stem from word"""
+        if not is_stop(word):
+            return self.light_stem(word)
+        else:
+            return stop_stem(word)
+    def getroot(self,word):
+        """ get a stem from word"""
+        if not is_stop(word):
+            word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+            self.light_stem(word)
+            self.segment(word)
+            affixation_list = self.get_affix_list()
+            # filter valid affixes
+            affixation_list = filter(self.verify_affix, affixation_list)
+
+            #~ root_result = rootslib.choose_root(affixation_list)
+            root_result = self.rootdict.choose_root_matrix(word, affixation_list, self.debug_root)
             if root_result:
                 return root_result
             else:
@@ -699,6 +754,7 @@ class factory_stemmer(object):
         "custom-affix",
         "custom-affix-stp",
         "custom-root",
+        "custom-root-matrix",
         "custom-stp",
         "rooter-only",
         "multi",
@@ -739,6 +795,8 @@ class factory_stemmer(object):
             asl = customStemmer_affix_stp()
         elif name == "custom-root":
             asl = customStemmer_roots()
+        elif name == "custom-root-matrix":
+            asl = customStemmer_roots_matrix()
         elif name == "custom-tag-root":
             asl = customStemmer_tag_root()
         elif name == "custom-tag":

@@ -77,7 +77,28 @@ def main():
         names = abstractstemmer.factory_stemmer.get_stemmers();
         names.extend(['khoja','farasa'])
     else:
-        names = ("custom-tag",  "custom-tag-root")
+        names =["default",
+        #~ "custom-tag-root",
+        #~ "custom-tag",
+        "isri",
+        "khoja",
+        "farasa",
+        #~ "isri+rooter",
+        "assem",
+        #~ "assem-stemmer",
+        #~ "assem+rooter",
+        #~ "khoja+rooter",
+        #~ "farasa+rooter",
+        #~ "custom-affix",
+        #~ "custom-affix-stp",
+        "custom-root",
+        "custom-root-matrix",
+        #~ "custom-stp",
+        #~ "rooter-only",
+        #~ "multi",
+        #~ "lemmatizer",
+        ]
+
         
 
     dstats = calcul_stats(df, names, stem_flag = True)
