@@ -21,11 +21,12 @@ if __name__ == '__main__':
     sys.path.append('support')
     sys.path.append('..')
 import pyarabic.araby as ar
+from pyarabic.arabrepr import arepr
 import tashaphyne.stemming
 import stem_verb_const as SVC
 #~import analex_const
-import libqutrub.classverb
-import arramooz.arabicdictionary as arabicdictionary
+#~ import libqutrub.classverb
+#~ import arramooz.arabicdictionary as arabicdictionary
 import wordcase
 
 #~ import  stemmedword
@@ -50,6 +51,14 @@ class VerbStemmer:
         # configure the stemmer object
         self.conj_stemmer.set_prefix_list(SVC.CONJ_PREFIX_LIST)
         self.conj_stemmer.set_suffix_list(SVC.CONJ_SUFFIX_LIST)
+        
+        # create a stemmer object for extract root from stems
+        self.root_stemmer = tashaphyne.stemming.ArabicLightStemmer()
+
+        # configure the stemmer object
+        self.root_stemmer.set_prefix_list(SVC.ROOT_PREFIX_LIST)
+        self.root_stemmer.set_suffix_list(SVC.ROOT_SUFFIX_LIST)
+
         # enable the last mark (Harakat Al-I3rab)
         self.allow_syntax_lastmark = True
 
@@ -64,7 +73,7 @@ class VerbStemmer:
         self.debug = debug
         self.cache_verb = {'verb': {}}
 
-        self.verb_dictionary = arabicdictionary.ArabicDictionary("verbs")
+        #~ self.verb_dictionary = arabicdictionary.ArabicDictionary("verbs")
 
         self.verb_stamp_pat = SVC.VERB_STAMP_PAT
 
@@ -153,112 +162,114 @@ class VerbStemmer:
         #~ print 'stamp', verb_in, len(tmp_list)
         # verify existance of condidate verb by stamp
         word_segmented_list = tmp_list
-        tmp_list = []
-        for word_seg in word_segmented_list:
-            # verify existance of condidate verb by stamp
-            if self.verb_dictionary.exists_as_stamp(word_seg['stem_conj']):
-                tmp_list.append(word_seg.copy())
+        #~ tmp_list = []
+        #~ for word_seg in word_segmented_list:
+            #~ # verify existance of condidate verb by stamp
+            #~ if self.verb_dictionary.exists_as_stamp(word_seg['stem_conj']):
+                #~ tmp_list.append(word_seg.copy())
 
-        #~ print 'infinitive', verb_in, len(tmp_list)
-        # get infinitive of condidate verbs
-        word_segmented_list = tmp_list
-        tmp_list = []
-        for word_seg in word_segmented_list:
-            # get infinitive of condidate verb by stamp
+        #print 'infinitive', verb_in, len(tmp_list)
+        #~ # get infinitive of condidate verbs
+        #~ word_segmented_list = tmp_list
+        #~ tmp_list = []
+        #~ for word_seg in word_segmented_list:
+            #~ # get infinitive of condidate verb by stamp
 
-            # search the verb in the dictionary by stamp
-            # if the verb exists in dictionary,
-            # The transitivity is consedered
-            # if is trilateral return its forms and Tashkeel
-            # if not return forms without tashkeel,
-            #because the conjugator can vocalized it,
-            # we can return the tashkeel if we don't need the
-            #conjugation step
-            infverb_dict = self.__get_infinitive_verb_by_stem(
-                word_seg['stem_conj'], word_seg['trans_comp'])
-            #~ print "list possible verbs", len(infverb_dict)
+            #~ # search the verb in the dictionary by stamp
+            #~ # if the verb exists in dictionary,
+            #~ # The transitivity is consedered
+            #~ # if is trilateral return its forms and Tashkeel
+            #~ # if not return forms without tashkeel,
+            #~ #because the conjugator can vocalized it,
+            #~ # we can return the tashkeel if we don't need the
+            #~ #conjugation step
+            #~ infverb_dict = self.__get_infinitive_verb_by_stem(
+                #~ word_seg['stem_conj'], word_seg['trans_comp'])
+            #print "list possible verbs", len(infverb_dict)
+            #for item in infverb_dict:
+            #print item['verb']
+            #~ # filter verbs
+            #~ infverb_dict = self.__verify_infinitive_verbs(
+                #~ word_seg['stem_conj'], infverb_dict)
+
             #~ for item in infverb_dict:
-            #~ print item['verb']
-            # filter verbs
-            infverb_dict = self.__verify_infinitive_verbs(
-                word_seg['stem_conj'], infverb_dict)
-
-            for item in infverb_dict:
-                #The haraka from is given from the dict
-                word_seg_l3 = word_seg.copy()
-                word_seg_l3['inf'] = item['verb']
-                word_seg_l3['haraka'] = item['haraka']
-                word_seg_l3['root'] = item.get('root','')
-                word_seg_l3['transitive'] = bool(item['transitive'] in ('y',
-                                                                        1))
-                tmp_list.append(word_seg_l3)
-                # conjugation step
+                #~ #The haraka from is given from the dict
+                #~ word_seg_l3 = word_seg.copy()
+                #~ word_seg_l3['inf'] = item['verb']
+                #~ word_seg_l3['haraka'] = item['haraka']
+                #~ word_seg_l3['root'] = item.get('root','')
+                #~ word_seg_l3['transitive'] = bool(item['transitive'] in ('y',
+                                                                        #~ 1))
+                #~ tmp_list.append(word_seg_l3)
+                #~ # conjugation step
 
         #~ print repr(tmp_list).replace('},','},\n').decode("unicode-escape")
         #~ print 'conj', verb_in, len(tmp_list)
         # get conjugation for every infinitive verb
-        word_segmented_list = tmp_list
-        tmp_list = []
-        for word_seg in word_segmented_list:
-            # ToDo, conjugate the verb with affix,
-            # if exists one verb which match, return it
-            # تصريف الفعل مع الزوائد
-            # إذا توافق التصريف مع الكلمة الناتجة
-            # تعرض النتيجة
-            one_correct_conj = self.__generate_possible_conjug(
-                word_seg['inf'], word_seg['stem_comp'],
-                word_seg['prefix'] + '-' + word_seg['suffix'],
-                word_seg['haraka'], word_seg['pro'], word_seg['enc'],
-                word_seg['transitive'])
+        #~ word_segmented_list = tmp_list
+        #~ tmp_list = []
+        #~ for word_seg in word_segmented_list:
+            #~ # ToDo, conjugate the verb with affix,
+            #~ # if exists one verb which match, return it
+            #~ # تصريف الفعل مع الزوائد
+            #~ # إذا توافق التصريف مع الكلمة الناتجة
+            #~ # تعرض النتيجة
+            #~ one_correct_conj = self.__generate_possible_conjug(
+                #~ word_seg['inf'], word_seg['stem_comp'],
+                #~ word_seg['prefix'] + '-' + word_seg['suffix'],
+                #~ word_seg['haraka'], word_seg['pro'], word_seg['enc'],
+                #~ word_seg['transitive'])
 
-            #~ print "len correct_conj", len(one_correct_conj)
-            for conj in one_correct_conj:
-                word_seg_l4 = word_seg.copy()
-                word_seg_l4['conj'] = conj.copy()
-                tmp_list.append(word_seg_l4)
+            ##~ print "len correct_conj", len(one_correct_conj)
+            #~ for conj in one_correct_conj:
+                #~ word_seg_l4 = word_seg.copy()
+                #~ word_seg_l4['conj'] = conj.copy()
+                #~ tmp_list.append(word_seg_l4)
 
         #~ print 'result', verb_in, len(tmp_list)
         # generate all resulted data
-        word_segmented_list = tmp_list
+        #~ word_segmented_list = tmp_list
 
         #~ tmp_list = []
         for word_seg in word_segmented_list:
-            conj = word_seg['conj']
-            vocalized, semivocalized = self.vocalize(
-                conj['vocalized'], word_seg['pro'], word_seg['enc'])
+            #~ conj = word_seg['conj']
+            #~ vocalized, semivocalized = self.vocalize(
+                #~ conj['vocalized'], word_seg['pro'], word_seg['enc'])
             tag_type = 'Verb'
-            original_tags = "y" if conj['transitive'] else "n"
+            #~ original_tags = "y" if conj['transitive'] else "n"
 
             detailed_result.append(wordcase.WordCase({
                 'word':word_seg['verb'],
                 'affix': (word_seg['pro'], word_seg['prefix'], word_seg['suffix'], word_seg['enc']),
                 'stem':word_seg['stem_conj'],
-                'root':ar.normalize_hamza(word_seg.get('root','')),
-                'original':conj['verb'],
-                'vocalized':vocalized,
-                'semivocalized':semivocalized,
-                'tags':u':'.join((conj['tense'], conj['pronoun'])+\
-                SVC.COMP_PREFIX_LIST_TAGS[proclitic]['tags']+\
-                SVC.COMP_SUFFIX_LIST_TAGS[enclitic]['tags']),#\
+                'root':"VTODO",
+                "original":"VTODO",
+                #~ 'root':ar.normalize_hamza(word_seg.get('root','')),
+                #~ 'original':conj['verb'],
+                #~ 'vocalized':vocalized,
+                #~ 'semivocalized':semivocalized,
+                #~ 'tags':u':'.join((conj['tense'], conj['pronoun'])+\
+                #~ SVC.COMP_PREFIX_LIST_TAGS[proclitic]['tags']+\
+                #~ SVC.COMP_SUFFIX_LIST_TAGS[enclitic]['tags']),#\
                 'type':tag_type,
-                'number': conj['pronoun_tags'].get('number', ''),
-                'gender': conj['pronoun_tags'].get('gender', ''),
-                'person': conj['pronoun_tags'].get('person', ''),
-                'tense2': conj['tense_tags'].get('tense', ''),
-                'voice': conj['tense_tags'].get('voice', ''),
-                'mood': conj['tense_tags'].get('mood', ''),
-                'confirmed': conj['tense_tags'].get('confirmed', ''),
-                'transitive': conj['transitive'],
-                'tense': conj['tense'],
-                'pronoun': conj['pronoun'],
-                'freq':'freqverb',
-                'originaltags':original_tags,
-                'syntax':'',
+                #~ 'number': conj['pronoun_tags'].get('number', ''),
+                #~ 'gender': conj['pronoun_tags'].get('gender', ''),
+                #~ 'person': conj['pronoun_tags'].get('person', ''),
+                #~ 'tense2': conj['tense_tags'].get('tense', ''),
+                #~ 'voice': conj['tense_tags'].get('voice', ''),
+                #~ 'mood': conj['tense_tags'].get('mood', ''),
+                #~ 'confirmed': conj['tense_tags'].get('confirmed', ''),
+                #~ 'transitive': conj['transitive'],
+                #~ 'tense': conj['tense'],
+                #~ 'pronoun': conj['pronoun'],
+                #~ 'freq':'freqverb',
+                #~ 'originaltags':original_tags,
+                #~ 'syntax':'',
             }))
 
         return detailed_result
 
-    def __get_infinitive_verb_by_stem(self, verb, transitive):
+    def __get_infinitive_verb_by_stem2(self, verb, transitive):
         """
         Get the infinitive verb form by given stem, and transitivity
         @param verb: the given verb
@@ -307,19 +318,19 @@ class VerbStemmer:
         """
         self.debug = debug
 
-    def enable_syntax_lastmark(self):
+    def enable_syntax_lastmark2(self):
         """
         Enable the syntaxic last mark attribute to allow use of I'rab harakat.
         """
         self.allow_syntax_lastmark = True
 
-    def disable_syntax_lastmark(self):
+    def disable_syntax_lastmark2(self):
         """
         Disable the syntaxic last mark attribute to allow use of I'rab harakat.
         """
         self.allow_syntax_lastmark = False
 
-    def __verify_infinitive_verbs(self, stem_conj, infverb_dict):
+    def __verify_infinitive_verbs2(self, stem_conj, infverb_dict):
         """
         verify if given infinitive verbs are compatible with stem_conj
         @param stem_conj: the stemmed verbs without conjugation affixes.
@@ -420,7 +431,7 @@ class VerbStemmer:
         self.compatibility_cache[comp_key] = False
         return False
 
-    def __check_clitic_tense(self, proclitic, enclitic, tense, pronoun,
+    def __check_clitic_tense2(self, proclitic, enclitic, tense, pronoun,
                              transitive):
         """
         test if the given tenses are compatible with proclitics
@@ -462,7 +473,7 @@ class VerbStemmer:
             self.compatibility_cache[comp_key] = False
             return False
 
-    def __generate_possible_conjug(self,
+    def __generate_possible_conjug2(self,
                                    infinitive_verb,
                                    unstemed_verb,
                                    affix,
@@ -573,7 +584,7 @@ class VerbStemmer:
             list_stem.append(ar.HAMZA + ar.ALEF + stem[1:])
         return list_stem
     @staticmethod
-    def get_enclitic_variant(word, enclitic):
+    def get_enclitic_variant2(word, enclitic):
         """
         Get the enclitic variant to be joined to the word.
         For example: word  =  أرجِهِ , enclitic = هُ.
@@ -593,7 +604,7 @@ class VerbStemmer:
         return enclitic
 
 
-    def vocalize(self,verb, proclitic, enclitic):
+    def vocalize2(self,verb, proclitic, enclitic):
         """
         Join the  verb and its affixes, and get the vocalized form
         @param verb: verb found in dictionary.

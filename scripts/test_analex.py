@@ -1,8 +1,12 @@
 ﻿#!/usr/bin/python
 # -*- coding = utf-8 -*-
 #~ from __future__ import absolute_import
+import sys
+sys.path.append('../rooter')
+sys.path.append('rooter')
+sys.path.append('../')
 
-import qalsadi.analex as qanalex
+import qalsadilight.analex as qanalex
 
 
 filename="samples/text.txt"
@@ -35,7 +39,7 @@ df = pd.DataFrame(adapted_result)
 print df.columns.values
 print(df.columns.values)
 print(df.head(12))
-display = df[['word','stem','type','root']]
+display = df[['word','stem','type','root','original']]
 display = display.drop_duplicates()
 #~ print(display.head(10))
 print(display)

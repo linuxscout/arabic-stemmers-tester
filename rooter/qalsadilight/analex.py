@@ -29,12 +29,12 @@ import naftawayh.wordtag  # word tagger
 import analex_const  # special constant for analex
 import stem_noun  # noun stemming
 import stem_verb  # verb stemming
-import stem_unknown  # unknown word stemming
+#~ import stem_unknown  # unknown word stemming
 import stem_stop as stem_stopwords  # stopwords word stemming
 import stem_pounct_const  # pounctaution constants
 import disambig  # disambiguation const
 import wordcase
-import stemmedword  # the result object for stemming
+#~ import stemmedword  # the result object for stemming
 import cache
 
 class Analex:
@@ -51,7 +51,7 @@ class Analex:
 
         self.nounstemmer = stem_noun.NounStemmer()  # to stem nouns
         self.verbstemmer = stem_verb.VerbStemmer()  # to stem verbs
-        self.unknownstemmer = stem_unknown.UnknownStemmer()
+        #~ self.unknownstemmer = stem_unknown.UnknownStemmer()
         # to stem unknown
         self.stopwordsstemmer = stem_stopwords.StopWordStemmer()
         # to stem stopwords
@@ -88,8 +88,8 @@ class Analex:
         self.partial_vocalization_support = True
 
         #word frequency dictionary
-        self.wordfreq = wordfreqdictionaryclass.WordFreqDictionary(
-            'wordfreq', wordfreqdictionaryclass.WORDFREQ_DICTIONARY_INDEX)
+        #~ self.wordfreq = wordfreqdictionaryclass.WordFreqDictionary(
+            #~ 'wordfreq', wordfreqdictionaryclass.WORDFREQ_DICTIONARY_INDEX)
 
         # added to avoid duplicated search in the word frequency database
         # used as cache to reduce database access
@@ -111,7 +111,7 @@ class Analex:
         self.wordfreq = None
         self.nounstemmer = None
         self.verbstemmer = None
-        self.unknownstemmer = None
+        #~ self.unknownstemmer = None
         self.stopwordsstemmer = None
         self.tagger = None
         self.disambiguator = None
@@ -278,25 +278,26 @@ class Analex:
                 )  # a ghost function to count words check function calls
                 guessedtag = list_guessed_tag[i]
                 one_data_list = self.check_word(word, guessedtag)
-                stemmed_one_data_list = [
-                    stemmedword.StemmedWord(w) for w in one_data_list
-                ]
-                resulted_data.append(stemmed_one_data_list)
+                #~ stemmed_one_data_list = [
+                    #~ stemmedword.StemmedWord(w) for w in one_data_list
+                #~ ]
+                #~ resulted_data.append(stemmed_one_data_list)
+                resulted_data.append(one_data_list)
         elif mode == 'nouns':
 
             for word in list_word[:self.limit]:
                 one_data_list = self.check_word_as_noun(word)
-                stemmed_one_data_list = [stemmedword.StemmedWord(w) \
-                for w in one_data_list]
-                resulted_data.append(stemmed_one_data_list)
-                #~ resulted_data.append(one_data_list)
+                #~ stemmed_one_data_list = [stemmedword.StemmedWord(w) \
+                #~ for w in one_data_list]
+                #~ resulted_data.append(stemmed_one_data_list)
+                resulted_data.append(one_data_list)
         elif mode == 'verbs':
             for word in list_word[:self.limit]:
                 one_data_list = self.check_word_as_verb(word)
-                stemmed_one_data_list = [stemmedword.StemmedWord(w) \
-                for w in one_data_list]
-                resulted_data.append(stemmed_one_data_list)
-                #~ resulted_data.append(one_data_list)
+                #~ stemmed_one_data_list = [stemmedword.StemmedWord(w) \
+                #~ for w in one_data_list]
+                #~ resulted_data.append(stemmed_one_data_list)
+                resulted_data.append(one_data_list)
         return resulted_data
 
     def check_word(self, word, guessedtag=""):
@@ -337,18 +338,18 @@ class Analex:
             #~self.tagger.is_stopword_tag(guessedtag):
             #~resulted_data += self.check_word_as_noun(word_nm)
             resulted_data += self.check_word_as_noun(word_nm)
-            if len(resulted_data) == 0:
-                #print (u"1 _unknown %s-%s"%(word, word_nm)).encode('utf8')
-                #check the word as unkonwn
-                resulted_data += self.check_word_as_unknown(word_nm)
-                #check if the word is nomralized and solution are equivalent
+            #~ if len(resulted_data) == 0:
+                #~ #print (u"1 _unknown %s-%s"%(word, word_nm)).encode('utf8')
+                #~ #check the word as unkonwn
+                #~ resulted_data += self.check_word_as_unknown(word_nm)
+                #~ #check if the word is nomralized and solution are equivalent
             resulted_data = self.check_normalized(word_vocalised, resulted_data)
             #check if the word is shadda like
             
             resulted_data = self.check_shadda(word_vocalised, resulted_data, self.fully_vocalized_input)
 
             # add word frequency information in tags
-            resulted_data = self.add_word_frequency(resulted_data)
+            #~ resulted_data = self.add_word_frequency(resulted_data)
 
             # add the stemmed words details into Cache
             data_list_to_serialize = [w.__dict__ for w in resulted_data]
@@ -382,8 +383,8 @@ class Analex:
                     '',
                     'template':
                     '',
-                    'freq':
-                    self.wordfreq.get_freq(word, 'unknown'),
+                    #~ 'freq':
+                    #~ self.wordfreq.get_freq(word, 'unknown'),
                     'syntax':
                     '',
                 }))
@@ -409,65 +410,6 @@ class Analex:
         """
         return self.check_text(text, "verbs")
 
-    def add_word_frequency(self, resulted_data):
-        """
-        If the entred word is like the found word in dictionary,
-        to treat some normalized cases,
-        the analyzer return the vocalized like words
-        ُIf the word is ذئب, the normalized form is ذءب, which can give
-        from dictionary ذئبـ ذؤب.
-        this function filter normalized resulted word according the
-        given word, and give ذئب.
-        @param resulted_data: the founded resulat from dictionary.
-        @type resulted_data: list of dict.
-        @return: list of dictionaries of analyzed words with tags.
-        @rtype: list.
-        """
-        # added to avoid duplicated search in the word frequency database
-        # used as cache to reduce database access
-        #added as a global variable to avoid duplucated search
-        #in mutliple call of analex
-        #checkedFreqWords = {'noun':{}, 'verb':{}} # global
-        for i, item in enumerate(resulted_data):
-            # get the original word of dictionary,
-            #~ item = resulted_data[i]
-            # search for the original (lexique entry)
-            #~ original = item.get('original', '')
-            original = item.__dict__.get('original', '')
-            # in the freq attribute we found 'freqverb, or freqnoun,
-            #  or a frequency for stopwords or unkown
-            # the freqtype is used to note the wordtype,
-            # this type is passed by stem_noun , or stem_verb modules
-            freqtype = item.__dict__.get('freq', '')
-            #~ freqtype = item.get('freq', '')
-            if freqtype == 'freqverb':
-                wordtype = 'verb'
-            elif freqtype == 'freqnoun':
-                wordtype = 'noun'
-            elif freqtype == 'freqstopword':
-                wordtype = 'stopword'
-            else:
-                wordtype = ''
-            if wordtype:
-                # if frequency is already get from database,
-                #  don't access to database
-                if self.allow_cache_use and self.cache.exists_cache_freq(
-                        original, wordtype):
-                    item.__dict__['freq'] = self.cache.get_freq(
-                        original, wordtype)
-
-                else:
-                    freq = self.wordfreq.get_freq(original, wordtype)
-                    #~print freq, wordtype, original.encode('utf8')
-                    #store the freq in the cache
-                    if self.allow_cache_use:
-                        #~ self.cache['FreqWords'][wordtype][original] = freq
-                        self.cache.add_freq(original, wordtype, freq)
-
-                    #~ item.__dict__['freq'] = freq
-                    item.__dict__['freq'] = freq
-            resulted_data[i] = item
-        return resulted_data
 
     def check_word_as_stopword(self, word):
         """
@@ -501,7 +443,7 @@ class Analex:
                     'vocalized': word,
                     'tags': u"عدد",
                     'type': 'NUMBER',
-                    'freq': 0,
+                    #~ 'freq': 0,
                     'syntax': '',
                     'root':'',
                 }))
@@ -527,8 +469,8 @@ class Analex:
                     stem_pounct_const.POUNCTUATION[word[0]]['tags'],
                     'type':
                     'POUNCT',
-                    'freq':
-                    0,
+                    #~ 'freq':
+                    #~ 0,
                     'syntax':
                     '',
                     'root':'',
@@ -556,15 +498,15 @@ class Analex:
         """
         return self.nounstemmer.stemming_noun(noun)
 
-    def check_word_as_unknown(self, noun):
-        """
-        Analyze the word as unknown.
-        @param noun: the input word.
-        @type noun: unicode.
-        @return: list of dictionaries of analyzed words with tags.
-        @rtype: list.
-        """
-        return self.unknownstemmer.stemming_noun(noun)
+    #~ def check_word_as_unknown(self, noun):
+        #~ """
+        #~ Analyze the word as unknown.
+        #~ @param noun: the input word.
+        #~ @type noun: unicode.
+        #~ @return: list of dictionaries of analyzed words with tags.
+        #~ @rtype: list.
+        #~ """
+        #~ return self.unknownstemmer.stemming_noun(noun)
 
     @staticmethod
     def check_shadda(word_vocalised, resulted_data, fully_vocalized_input=False):

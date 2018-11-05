@@ -1208,3 +1208,18 @@ AJUST_VOCAL_PATTERNS = [
     #~ word_vocalized = re.sub(ur"%s[%s|%s|%s]" % (ar.ALEF_MAKSURA, ar.DAMMA,
                                                #~ ar.FATHA, ar.KASRA),
                             #~ ar.ALEF_MAKSURA, word_vocalized)
+
+ROOT_PREFIX_LIST=[
+u'ت',
+u'أ',
+u'إ',
+u'م',
+u'مت',
+u'من',
+u'مست',
+u'ا',
+u'ان',
+u'است',
+]
+ROOT_SUFFIX_LIST=[
+]

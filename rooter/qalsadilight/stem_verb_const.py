@@ -1589,3 +1589,14 @@ EXTERNAL_SUFFIX_TABLE[u'هما'] = qutrubVerbConst.PronounsTable
 EXTERNAL_SUFFIX_TABLE[u'هم'] = qutrubVerbConst.PronounsTable
 EXTERNAL_SUFFIX_TABLE[u'هنّ'] = qutrubVerbConst.PronounsTable
 EXTERNAL_SUFFIX_TABLE[u'هن'] = qutrubVerbConst.PronounsTable
+
+
+ROOT_PREFIX_LIST=[
+u'ت',
+u'أ',
+u'ا',
+u'ان',
+u'است',
+]
+ROOT_SUFFIX_LIST=[
+]
