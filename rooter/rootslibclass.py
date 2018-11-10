@@ -30,6 +30,7 @@ from __future__ import (
 import pyarabic.araby as araby
 from pyarabic import stack
 from pyarabic.araby import FEH, LAM, AIN, HARAKAT
+from pyarabic.arabrepr import arepr
 import roots_const
 import re
 import itertools
@@ -95,7 +96,7 @@ WAZNS = set([u'عاءل',
 
 class rootDict:
     """ a class to handle roots and lookup for roots """
-    def __init__(self,):
+    def __init__(self, algos=[]):
         self.STAMP_DICT   ={}
         self.VIRTUAL_DICT ={}
         self.stamp_pat = re.compile(u"[%s%s%s%s%s%s%s%s%s%s]"% (araby.ALEF, 
@@ -112,6 +113,10 @@ class rootDict:
         'stamped':{},
         'extend':{},
         }
+        self.algos =['virtual', 'stamp', 'extend', 'rhyzome']
+        if algos:
+            self.algos = algos
+
     @staticmethod
     def is_root(word):
         """ test if word is a root"""
@@ -402,6 +407,7 @@ class rootDict:
         # we think to test all algorithms then get the most common root
         # the secnd way when all_algorithms is false, we use if else to get the given root, and stop when we can get one at least
         all_algo = True
+        algos = self.algos
         #roots
         stems = [ self.normalize_root(d['stem']) for d in affixation_list]
         roots = [ self.normalize_root(d['root']) for d in affixation_list]
@@ -433,7 +439,7 @@ class rootDict:
             self.debug_algo(debug, word, 2 , "default as stem", stems, stems, roots_tmp, accepted)
 
         # Virtual roots
-        if all_algo or not accepted :#and False:
+        if (all_algo or not accepted) and 'virtual' in self.algos :#and False:
             # try to virtualize roots
             virtual_roots = []
             #~ for x in roots:
@@ -454,7 +460,7 @@ class rootDict:
 
 
         # Tiny Scheme extraction
-        if all_algo or not accepted:
+        if (all_algo or not accepted) and 'rhyzome' in self.algos :
             # try to extract roots from stems
 
             wazn_roots = []
@@ -475,7 +481,7 @@ class rootDict:
 
 
         # Extending roots
-        if all_algo or not accepted:
+        if (all_algo or not accepted) and 'extend' in self.algos :
         #~ if False :#not accepted:
             # try to extend roots
             extended_roots = []
@@ -491,7 +497,7 @@ class rootDict:
             self.debug_algo(debug, word, 5, "extended roots", roots, extended_roots, roots_tmp, accepted)
 
         # stamped roots
-        if all_algo or not accepted:
+        if (all_algo or not accepted) and 'stamp' in self.algos:
         #~ if False :#not accepted:
             # try to extend roots
             stamped_roots = []
@@ -545,12 +551,30 @@ class rootDict:
         set_roots = [x for x in set(roots) if self.is_root(x)]
         # remove invalid roots and keep repetition
         accepted = [x for x in roots if x in set_roots]
+        all_accepted.extend(accepted)
 
         self.debug_algo(debug, word, 1 , "Matrix", roots, roots, roots_tmp, accepted)
+        
+        #~ # Tiny Scheme extraction
+        #~ # try to extract roots from stems
+        #~ wazn_roots = []
+        #~ for x in stems:
+            #~ if x not in self.cache['rhyzome']:
+                #~ self.cache['rhyzome'][x] = self.valid_starstem(x)               
+
+            #~ wazn_roots.extend(self.cache['rhyzome'][x])
+        #~ roots_tmp =  self.filter_root_length_valid(wazn_roots)
+        #~ # lookup for real roots
+        #~ accepted = filter( self.is_root, roots_tmp)
+        #~ all_accepted.extend(accepted)
+        #~ self.debug_algo(debug, word, 4, "Rhyzome roots", stems, wazn_roots, roots_tmp, accepted)
+
+
+        
         # to handle all accepted together
-        if accepted:
+        if all_accepted:
             #select tri-letter before selecting 4 letters
-            return  self.most_common(accepted)
+            return  self.most_common(all_accepted)
         else:
             return ''
         
@@ -572,8 +596,8 @@ class rootDict:
         accepted = filter( self.is_root, roots_tmp)
         #~ accepted = roots_tmp
         self.debug_algo(debug, 2, "stem scheme roots", stems,wazn_roots, roots_tmp, accepted)    
-
         return accepted
+    
     #~ @staticmethod
     def matrix_root(self, word, affixation_letters = AFFIXATION_LETTERS):
         """ extract all possibles roots as matrix """
@@ -670,13 +694,13 @@ class rootDict:
         # filter by root length
         templates_list = [ d for d in templates_list if len(d['root']) <=4 ]
         incompleted_templates_list = [ d for d in templates_list if len(d['root']) <3 ]
-        #~ logger.debug("Incomplete Templates List %s", arepr(incompleted_templates_list))
+        #~ self.debug_algo2(u"Incomplete Templates List ", arepr(incompleted_templates_list))
 
         ext_list = self.extend_matrix(incompleted_templates_list)
         
         #~ logger.debug("Templates %d", len(templates_list))
-        #~ logger.debug("Templates List %s", arepr(templates_list))
-        #~ logger.debug("Extented Templates List %s", arepr(ext_list))
+        #~ self.debug_algo2(u"Templates List ",arepr(templates_list))
+        #~ self.debug_algo2(u"Extented Templates List ",arepr(ext_list))
         templates_list.extend(ext_list)
         return templates_list
     @staticmethod
