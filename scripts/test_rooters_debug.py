@@ -62,7 +62,7 @@ def test_rooter(dataframe_result):
     from tashaphyne.stemming import ArabicLightStemmer
     import rootslibclass
     asl = ArabicLightStemmer() 
-    rooter = rootslibclass.rootDict()       
+    rooter = rootslibclass.rootDict(algos=['rhyzome','stamp'])       
     df = dataframe_result
     total = df.size
     cpt = 0

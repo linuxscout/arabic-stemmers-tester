@@ -29,7 +29,7 @@ import abstractstemmer
 import pandas as pd
 import numpy as np
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
-
+import pyarabic.araby as araby
 
 def grabargs():
     parser = argparse.ArgumentParser(description='Convert Quran Corpus into CSV format.')
@@ -293,6 +293,8 @@ if __name__ == '__main__':
         #~ limit =  100000000
     #~ else: limit =0;
     df = df.replace(np.nan, '', regex=True)
+    # filter stopwords and non arabic words
+    
     # prepare stemmers
     if all_stemmers:
         names = abstractstemmer.factory_stemmer.get_stemmers();
@@ -319,6 +321,10 @@ if __name__ == '__main__':
         #~ "rooter-only",
         #~ "multi",
         #~ "lemmatizer",
+        "stamp",
+        "extend",
+        "rhyzome",
+        "virtual",
         ]
     # add some stemmers to be controled under csv file 
     # show conditions

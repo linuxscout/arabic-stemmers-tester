@@ -97,6 +97,10 @@ def main():
         #~ "rooter-only",
         #~ "multi",
         #~ "lemmatizer",
+        "rhyzome",
+        "stamp",
+        "extend",
+        "virtual",
         ]
 
         

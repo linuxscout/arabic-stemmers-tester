@@ -75,6 +75,7 @@ def test_matrix(dataframe_result):
     import rootslibclass
     asl = ArabicLightStemmer()
     rooter = rootslibclass.rootDict() 
+    rooter.debug = True 
     #test with tashaphyne
     df = dataframe_result
     total = df.size
@@ -126,6 +127,7 @@ def test_rooter_matrix(dataframe_result):
     for word, root in zip(df["word"], df["root"]):
         print((u"**********%s*********"%word).encode('utf8'))
         asl.light_stem(word)
+        root_list = root.split(';')        
         print((u"Start Word : %s"%asl.get_starword()).encode('utf8'))        
         
         asl.segment(word)
@@ -141,10 +143,14 @@ def test_rooter_matrix(dataframe_result):
         #~ root_result = rooter.choose_wazn_root(affixa_list, debug=True)
         root_result = rooter.choose_root_matrix(word, affixa_list, debug=True)
         #~ print(u"Test root",root_result.encode('utf8'), u"found root",root_result.encode('utf8'), root_result == root)
+        #~ print((u" ".join([u"Test root", root, u"found root",
+        #~ root_result, str(root_result == root)])).encode('utf8'))
+        #~ if root_result == root:
+            #~ cpt += 1
         print((u" ".join([u"Test root", root, u"found root",
-        root_result, str(root_result == root)])).encode('utf8'))
-        if root_result == root:
-            cpt += 1
+        root_result, str(root_result in root_list)])).encode('utf8'))
+        if root_result in  root_list:
+            cpt += 1            
     print("***** Percent %.2f%%"%(cpt*100/total))            
 
 
