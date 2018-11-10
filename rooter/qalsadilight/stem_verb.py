@@ -20,6 +20,9 @@ if __name__ == '__main__':
     sys.path.append('../support')
     sys.path.append('support')
     sys.path.append('..')
+import sys
+sys.path.append('..')
+import rootslibclass
 import pyarabic.araby as ar
 from pyarabic.arabrepr import arepr
 import tashaphyne.stemming
@@ -76,6 +79,8 @@ class VerbStemmer:
         #~ self.verb_dictionary = arabicdictionary.ArabicDictionary("verbs")
 
         self.verb_stamp_pat = SVC.VERB_STAMP_PAT
+        
+        self.rooter = rootslibclass.rootDict()
 
 
 
@@ -229,20 +234,37 @@ class VerbStemmer:
         #~ print 'result', verb_in, len(tmp_list)
         # generate all resulted data
         #~ word_segmented_list = tmp_list
+        
+        #filter invalid verb stem like the case of TEH Marbuta
+        word_segmented_list = [x for x in word_segmented_list if self.is_valid_verb_stem(x['stem_conj'])]
+        
+        # add root ans lemma
+        for word_seg in word_segmented_list:
+            # Choose a root
+            word_seg['root'] = self.choose_wazn_root(stem)
+        # remove empty roots
+        tmp_list = [x for x in word_segmented_list if x['root']]
+        # if the tmp list is empty, there are no root,
+        # in this case we sould remove this case
+        # make it temporary for test
+        if tmp_list:
+            word_segmented_list = tmp_list
 
-        #~ tmp_list = []
+        # create result
+        
         for word_seg in word_segmented_list:
             #~ conj = word_seg['conj']
             #~ vocalized, semivocalized = self.vocalize(
                 #~ conj['vocalized'], word_seg['pro'], word_seg['enc'])
             tag_type = 'Verb'
             #~ original_tags = "y" if conj['transitive'] else "n"
-
+            stem = word_seg['stem_conj']
             detailed_result.append(wordcase.WordCase({
                 'word':word_seg['verb'],
                 'affix': (word_seg['pro'], word_seg['prefix'], word_seg['suffix'], word_seg['enc']),
-                'stem':word_seg['stem_conj'],
-                'root':"VTODO",
+                'stem':stem,
+                #~ 'root':"VTODO",
+                'root':self.choose_wazn_root(stem),
                 "original":"VTODO",
                 #~ 'root':ar.normalize_hamza(word_seg.get('root','')),
                 #~ 'original':conj['verb'],
@@ -631,7 +653,34 @@ class VerbStemmer:
             [proclitic_voc, ar.strip_lastharaka(verb), enclitic_voc])
         return (vocalized, semivocalized)
 
+    def choose_wazn_root(self, stem, debug=False):
+        """
+        Choose root according to wazns 
+        """
+        accepted = []
+        #roots
+        stem = self.rooter.normalize_root(stem)
 
+        # Tiny Scheme extraction
+        wazn_roots = []
+        wazn_roots =  self.rooter.matrix_root(stem,u'توطيداسن')
+        wazn_roots =  self.rooter.valid_starstem(stem)
+        # filter by length
+        roots_tmp =  self.rooter.filter_root_length_valid(wazn_roots)
+        # lookup for real roots
+        accepted = filter( self.rooter.is_root, roots_tmp)
+        return u";".join(set(accepted))
+    @staticmethod
+    def is_valid_verb_stem(stem):
+        """ test if the given verb stem can be valid, like Teh marbuta can't be in verb"""
+        if ar.TEH_MARBUTA in stem:
+            return False
+        elif ar.ALEF_HAMZA_BELOW in stem:
+            return False
+        elif len(stem)>6:
+            return False
+        return True
+    
 def mainly():
     """
     Test main"""

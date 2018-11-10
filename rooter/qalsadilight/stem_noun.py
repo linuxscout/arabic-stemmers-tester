@@ -210,6 +210,11 @@ class NounStemmer:
         #~ if debug:
             #~ print(repr(tmp_list).replace('},',
                                          #~ '},\n').decode("unicode-escape"))
+
+        #filter invalid noun stem like the case of TEH Marbuta
+        word_segmented_list = [x for x in word_segmented_list if self.is_valid_noun_stem(x['stem_conj'])]
+        
+
         # Generate results
         #~ word_segmented_list = tmp_list
         tmp_list = []
@@ -746,7 +751,15 @@ class NounStemmer:
     # u'k_suffix':21, *
     # u'annex':22,
         return True
-
+    @staticmethod
+    def is_valid_noun_stem(stem):
+        """ test if the given noun stem can be valid,
+         like Teh marbuta can't be in noun only at the end"""
+        if ar.TEH_MARBUTA in stem[:-1]:
+            return False
+        if ar.ALEF_MAKSURA in stem[:-1]:
+            return False
+        return True
 
 def mainly():
     """

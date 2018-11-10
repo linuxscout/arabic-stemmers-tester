@@ -29,7 +29,7 @@ import naftawayh.wordtag  # word tagger
 import analex_const  # special constant for analex
 import stem_noun  # noun stemming
 import stem_verb  # verb stemming
-#~ import stem_unknown  # unknown word stemming
+import stem_unknown  # unknown word stemming
 import stem_stop as stem_stopwords  # stopwords word stemming
 import stem_pounct_const  # pounctaution constants
 import disambig  # disambiguation const
@@ -51,7 +51,7 @@ class Analex:
 
         self.nounstemmer = stem_noun.NounStemmer()  # to stem nouns
         self.verbstemmer = stem_verb.VerbStemmer()  # to stem verbs
-        #~ self.unknownstemmer = stem_unknown.UnknownStemmer()
+        self.unknownstemmer = stem_unknown.UnknownStemmer()
         # to stem unknown
         self.stopwordsstemmer = stem_stopwords.StopWordStemmer()
         # to stem stopwords
@@ -324,29 +324,31 @@ class Analex:
             # the stop word can also be another normal word (verb or noun),
             # we must consider it in future works
             # if word is stopword allow stop words analysis
-            resulted_data += self.check_word_as_stopword(word_nm)
+            stopwors_analysis =  self.check_word_as_stopword(word_nm)
+            resulted_data = stopwors_analysis
 
             #if word is verb
             # مشكلة بعض الكلمات المستبعدة تعتبر أفعلا أو اسماء
             #~if  self.tagger.has_verb_tag(guessedtag) or \
             #~self.tagger.is_stopword_tag(guessedtag):
             #~resulted_data += self.check_word_as_verb(word_nm)
-            resulted_data += self.check_word_as_verb(word_nm)
-            #print "is verb", rabti, len(resulted_data)
-            #if word is noun
-            #~if self.tagger.has_noun_tag(guessedtag) or \
-            #~self.tagger.is_stopword_tag(guessedtag):
-            #~resulted_data += self.check_word_as_noun(word_nm)
-            resulted_data += self.check_word_as_noun(word_nm)
-            #~ if len(resulted_data) == 0:
-                #~ #print (u"1 _unknown %s-%s"%(word, word_nm)).encode('utf8')
-                #~ #check the word as unkonwn
-                #~ resulted_data += self.check_word_as_unknown(word_nm)
+            if not stopwors_analysis:
+                resulted_data += self.check_word_as_verb(word_nm)
+                #print "is verb", rabti, len(resulted_data)
+                #if word is noun
+                #~if self.tagger.has_noun_tag(guessedtag) or \
+                #~self.tagger.is_stopword_tag(guessedtag):
+                #~resulted_data += self.check_word_as_noun(word_nm)
+                resulted_data += self.check_word_as_noun(word_nm)
+            if len(resulted_data) == 0:
+                #print (u"1 _unknown %s-%s"%(word, word_nm)).encode('utf8')
+                #check the word as unkonwn
+                resulted_data += self.check_word_as_unknown(word_nm)
                 #~ #check if the word is nomralized and solution are equivalent
             resulted_data = self.check_normalized(word_vocalised, resulted_data)
             #check if the word is shadda like
             
-            resulted_data = self.check_shadda(word_vocalised, resulted_data, self.fully_vocalized_input)
+            #~ resulted_data = self.check_shadda(word_vocalised, resulted_data, self.fully_vocalized_input)
 
             # add word frequency information in tags
             #~ resulted_data = self.add_word_frequency(resulted_data)
@@ -357,9 +359,9 @@ class Analex:
                 self.cache.add_checked(word_nm, data_list_to_serialize)
 
         #check if the word is vocalized like results
-        if self.partial_vocalization_support:
-            resulted_data = self.check_partial_vocalized(word_vocalised,
-                                                    resulted_data)
+        #~ if self.partial_vocalization_support:
+            #~ resulted_data = self.check_partial_vocalized(word_vocalised,
+                                                    #~ resulted_data)
 
         if len(resulted_data) == 0:
             resulted_data.append(
@@ -440,11 +442,11 @@ class Analex:
                     'affix': ('', '', '', ''),
                     'stem': '',
                     'original': word,
-                    'vocalized': word,
-                    'tags': u"عدد",
+                    #~ 'vocalized': word,
+                    #~ 'tags': u"عدد",
                     'type': 'NUMBER',
                     #~ 'freq': 0,
-                    'syntax': '',
+                    #~ 'syntax': '',
                     'root':'',
                 }))
         # test if all chars in word are punctuation
@@ -459,20 +461,14 @@ class Analex:
                     'word':
                     word,
                     'affix': ('', '', '', ''),
-                    'stem':
-                    '',
-                    'original':
-                    word,
-                    'vocalized':
-                    word,
-                    'tags':
-                    stem_pounct_const.POUNCTUATION[word[0]]['tags'],
-                    'type':
-                    'POUNCT',
+                    'stem': '',
+                    'original':word,
+                    #~ 'vocalized':  word,
+                    #~ 'tags':         stem_pounct_const.POUNCTUATION[word[0]]['tags'],
+                    'type': 'POUNCT',
                     #~ 'freq':
                     #~ 0,
-                    'syntax':
-                    '',
+                    #~ 'syntax':  '',
                     'root':'',
                 }))
 
@@ -498,15 +494,15 @@ class Analex:
         """
         return self.nounstemmer.stemming_noun(noun)
 
-    #~ def check_word_as_unknown(self, noun):
-        #~ """
-        #~ Analyze the word as unknown.
-        #~ @param noun: the input word.
-        #~ @type noun: unicode.
-        #~ @return: list of dictionaries of analyzed words with tags.
-        #~ @rtype: list.
-        #~ """
-        #~ return self.unknownstemmer.stemming_noun(noun)
+    def check_word_as_unknown(self, noun):
+        """
+        Analyze the word as unknown.
+        @param noun: the input word.
+        @type noun: unicode.
+        @return: list of dictionaries of analyzed words with tags.
+        @rtype: list.
+        """
+        return self.unknownstemmer.stemming_noun(noun)
 
     @staticmethod
     def check_shadda(word_vocalised, resulted_data, fully_vocalized_input=False):
