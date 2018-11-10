@@ -294,8 +294,6 @@ class customStemmer_roots(abstractStemmer):
         infixes_letters_custom = u"توطيدا"
         self.set_infix_letters(infixes_letters_custom)
         self.config["root_dict"] = "yes"
-        #~ rootslib.create_stamped_roots()
-        #~ rootslib.create_virtual_roots()
         self.rootdict = rootslibclass.rootDict()
     
     def getstem(self,word):
@@ -339,7 +337,30 @@ class customStemmer_roots(abstractStemmer):
             ):
                 return False
         return True
+
+class customStemmer_roots_stamp(customStemmer_roots):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        customStemmer_roots.__init__(self)
+        self.rootdict.algos = ['stamp']
+class customStemmer_roots_extend(customStemmer_roots):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        customStemmer_roots.__init__(self)
+        self.rootdict.algos = ['extend']
         
+class customStemmer_roots_rhyzome(customStemmer_roots):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        customStemmer_roots.__init__(self)
+        self.rootdict.algos = ['rhyzome']
+
+class customStemmer_roots_virtual(customStemmer_roots):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        customStemmer_roots.__init__(self)
+        self.rootdict.algos = ['virtual']
+
 class customStemmer_roots_matrix(abstractStemmer):
     """ I will make more options for stemmer """
     def __init__(self,):
@@ -759,6 +780,10 @@ class factory_stemmer(object):
         "rooter-only",
         "multi",
         "lemmatizer",
+        "stamp",
+        "rhyzome",
+        "extend",
+        "virtual",
         ]
         return namelist
     @staticmethod
@@ -795,6 +820,14 @@ class factory_stemmer(object):
             asl = customStemmer_affix_stp()
         elif name == "custom-root":
             asl = customStemmer_roots()
+        elif name == "stamp":
+            asl = customStemmer_roots_stamp()
+        elif name == "extend":
+            asl = customStemmer_roots_extend()
+        elif name == "rhyzome":
+            asl = customStemmer_roots_rhyzome()
+        elif name == "virtual":
+            asl = customStemmer_roots_virtual()
         elif name == "custom-root-matrix":
             asl = customStemmer_roots_matrix()
         elif name == "custom-tag-root":
