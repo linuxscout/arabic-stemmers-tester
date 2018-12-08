@@ -29,6 +29,8 @@ import abstractstemmer
 import pandas as pd
 import numpy as np
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
+import pyarabic.araby as araby
+from stopwords.arabicstopwords import is_stop, stop_stem, stop_root
 
 
 def grabargs():
@@ -62,9 +64,15 @@ def test_rooter(dataframe_result):
     from tashaphyne.stemming import ArabicLightStemmer
     import rootslibclass
     asl = ArabicLightStemmer() 
-    rooter = rootslibclass.rootDict(algos=['rhyzome','stamp'])       
+    rooter = rootslibclass.rootDict(algos=['rhyzome']) 
+    # debug in rhyzome rooter
+    rooter.rhyzome_rooter.debug = True     
+    #~ rooter = rootslibclass.rootDict()       
     df = dataframe_result
-    total = df.size
+    # avoid null roots
+    
+    #~ total = df.size
+    total = len(df.index)
     cpt = 0
     for word, root in zip(df["word"], df["root"]):
         root_list = root.split(';')
@@ -72,6 +80,8 @@ def test_rooter(dataframe_result):
         asl.light_stem(word)
         print((u"Start Word : %s"%asl.get_starword()).encode('utf8'))        
         
+        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+
         asl.segment(word)
         print(asl.get_segment_list()  )
         seg_list = asl.get_segment_list()  
@@ -89,7 +99,98 @@ def test_rooter(dataframe_result):
         root_result, str(root_result in root_list)])).encode('utf8'))
         if root_result in  root_list:
             cpt += 1
-    print("***** Percent %.2f%%"%(cpt*100/total))
+    print("***** Percent %.2f%% [%d/%d]"%(cpt*100.0/total, cpt, total))
+
+def test_rooter2(dataframe_result):
+    """
+    """
+    from pyarabic.arabrepr import arepr
+    #test with tashaphyne
+    asl = abstractstemmer.customStemmer_roots_rhyzome() 
+    # debug in rhyzome rooter
+    asl.rootdict.rhyzome_rooter.debug = True
+    rooter =  asl.rootdict    
+    df = dataframe_result
+    # avoid null roots
+    
+    total = len(df.index)
+    cpt = 0
+    for word, root in zip(df["word"], df["root"]):
+        root_list = root.split(';')
+        print((u"**********%s*********"%word).encode('utf8'))
+        asl.light_stem(word)
+        print((u"Start Word : %s"%asl.get_starword()).encode('utf8'))        
+        
+        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+
+        asl.segment(word)
+        print(asl.get_segment_list()  )
+        seg_list = asl.get_segment_list()  
+        starstem_list =[]
+        affixa_list = asl.get_affix_list()
+        # stems prints 
+        stems = [ d['stem'] for d in affixa_list]
+        print("Stems: "+u' '.join(stems).encode('utf8'))        
+        roots = [ d['root'] for d in affixa_list]
+        print((u"Dafault roots: [%s] a %s"%(asl.get_root(),u' '.join(roots))).encode('utf8'))        
+        #~ root_result = rooter.choose_wazn_root(affixa_list, debug=True)
+        root_result = rooter.choose_root(word, affixa_list, debug=True)
+        #~ print(u"Test root",root_result.encode('utf8'), u"found root",root_result.encode('utf8'), root_result == root)
+        print((u" ".join([u"Test root", root, u"found root",
+        root_result, str(root_result in root_list)])).encode('utf8'))
+        if root_result in  root_list:
+            cpt += 1
+    print("***** Percent %.2f%% [%d/%d]"%(cpt*100.0/total, cpt, total))
+
+def test_rooter3(dataframe_result):
+    """
+    """
+    from pyarabic.arabrepr import arepr
+    #test with tashaphyne
+    asl = abstractstemmer.customStemmer_roots_rhyzome() 
+    # debug in rhyzome rooter
+    asl.rootdict.rhyzome_rooter.debug = True
+    df = dataframe_result
+    # avoid null roots
+    
+    total = len(df.index)
+    cpt = 0
+    for word, root in zip(df["word"], df["root"]):
+        root_list = root.split(';')
+        if not is_stop(word):
+            word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+            asl.light_stem(word)
+            default_root  = asl.get_root()
+            starword = asl.get_starword()
+            asl.segment(word)
+            affixa_list = asl.get_affix_list()
+            # filter valid affixes
+            affixa_list = filter(asl.verify_affix, affixa_list)
+            #~ root_result = rootslib.choose_root(affixation_list)
+            if True:
+                stems = [ d['stem'] for d in affixa_list]
+                roots = [ d['root'] for d in affixa_list]
+                print((u"**********%s*********"%word).encode('utf8'))
+                print((u"Start Word : %s"%starword).encode('utf8'))        
+                print("Stems: "+u' '.join(stems).encode('utf8'))   
+                print((u"Dafault roots: [%s] a %s"%(default_root,u' '.join(roots))).encode('utf8'))        
+                print(arepr(affixa_list))   
+            
+            root_result = asl.rootdict.choose_root(word, affixa_list,debug = True)
+        else:
+            root_result = stop_root(word)            
+            roots = []
+            stems = []
+            startword =""
+            default_root = ""
+            affixa_list = []            
+        if root_result in  root_list:
+            cpt += 1
+        if True:
+            print((u" ".join([u"Test root", root, u"found root",
+            root_result, str(root_result in root_list)])).encode('utf8'))
+
+    print("***** Percent %.2f%% [%d/%d]"%(cpt*100.0/total, cpt, total))
 
 
 
@@ -116,7 +217,7 @@ def test2():
 
     # add some stemmers to be controled under csv file 
     # show conditions
-    test_rooter(df)
+    test_rooter3(df)
 
 if __name__ == '__main__':
     

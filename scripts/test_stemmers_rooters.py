@@ -120,7 +120,11 @@ def calcul_stats_old(dataframe, names, root_flag = True, stem_flag = False,lemma
     
     return dstats
     
-
+def my_test(root_origin, root_calculated):
+    """ exists root """
+    roots = root_origin.split(';')
+    return root_calculated in roots
+    
 def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=False, ):
     """
     Calculer 
@@ -133,15 +137,19 @@ def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=F
     stats_list = []
     for name in names:
         cpt_stem = df[df.lemma == df[name+"_stem"]][name].count()
-        cpt = df[df.root == df[name]][name].count()
+        #~ cpt = df[df.root == df[name]][name].count()
+        df['Value'] = df.apply(lambda row: my_test(row['root'], row[name]), axis=1)
+        #~ cpt = df[df.root  in df[name].split(';')][name].count()
+        cpt = df[df.Value == True][name].count()
+        
         stats_list.append({
         "name":name,
         "method":"root",
         "average":'micro',
         "count":cpt,
         "total":total,
-        #~ "linguistics accuracy": cpt *100.0 / total,
-        'Accuracy': accuracy_score(df["root"],df[name])*100,
+        "Accuracy": cpt *100.0 / total,
+        #~ 'Accuracy': accuracy_score(df["root"],df[name])*100,
         'F1 score': f1_score(df["root"],df[name], average='micro')*100,
         'Recall':recall_score(df["root"],df[name], average='micro')*100,
         'Precision': precision_score(df["root"],df[name], average='micro')*100,
@@ -304,11 +312,11 @@ if __name__ == '__main__':
         names =["default",
         #~ "custom-tag-root",
         #~ "custom-tag",
-        "isri",
-        "khoja",
-        "farasa",
+        #~ "isri",
+        #~ "khoja",
+        #~ "farasa",
         #~ "isri+rooter",
-        "assem",
+        #~ "assem",
         #~ "assem-stemmer",
         #~ "assem+rooter",
         #~ "khoja+rooter",
@@ -316,26 +324,27 @@ if __name__ == '__main__':
         #~ "custom-affix",
         #~ "custom-affix-stp",
         "custom-root",
-        "custom-root-matrix",
+        #~ "custom-root-matrix",
         #~ "custom-stp",
         #~ "rooter-only",
         #~ "multi",
         #~ "lemmatizer",
-        "stamp",
-        "extend",
+        #~ "stamp",
+        #~ "extend",
         "rhyzome",
-        "virtual",
+        #~ "virtual",
+        #~ "virtual+extend",
         ]
     # add some stemmers to be controled under csv file 
     # show conditions
-    names_to_control =["assem_stemmer","default","custom-affix"]
+    names_to_control =["rhyzome","default","custom-root"]
     # add features
-    df = test_stemmers(df, data_path, names, names_to_control)
+    df2 = test_stemmers(df, data_path, names, names_to_control)
 
     # save file on csv
-    df.to_csv(outfile, sep='\t', encoding='utf-8')
+    df2.to_csv(outfile, sep='\t', encoding='utf-8')
     
-    dstats = calcul_stats(df, names, stem_flag = True)
+    dstats = calcul_stats(df2, names, stem_flag = True)
 
     dstats.to_csv(outfile+".stats", sep='\t', encoding='utf-8')    
     print(dstats)

@@ -45,6 +45,66 @@ VERB_SUFFIX_LIST = absconst.VERB_SUFFIX_LIST
 ALEFAT_PAT = re.compile(u"["+u"".join([araby.ALEF_MADDA, araby.ALEF_HAMZA_ABOVE,
                                        araby.ALEF_HAMZA_BELOW, araby.HAMZA_ABOVE,
                                        araby.HAMZA_BELOW])+u"]")
+                                
+REVIEWED_PREFIX_LIST = list(tashaphyne.stem_const.DEFAULT_PREFIX_LIST) + list([
+u'لن',
+u'لنست',
+u'لنت',
+u'لي',
+u'ليست',
+u'ليت',
+u'لت',
+u'لتست',
+u'لتت',
+u'ولن',
+u'ولنست',
+u'ولنت',
+u'ولي',
+u'وليست',
+u'وليت',
+u'ولت',
+u'ولتست',
+u'ولتت',
+u'فلن',
+u'فلنست',
+u'فلنت',
+u'فلي',
+u'فليست',
+u'فليت',
+u'فلت',
+u'فلتست',
+u'فلتت',
+])
+
+REVIEWED_SUFFIX_LIST = list(tashaphyne.stem_const.DEFAULT_SUFFIX_LIST) + list([
+u'اء',
+u'ى',
+u"كهم",
+u"كهن",
+u"كهما",
+u"كه",
+u'اته',
+u'اتها',
+u'اتهم',
+u'اتهن',
+u'اتهما',
+u'اتك',
+u'اتكا',
+u'اتكم',
+u'اتكن',
+u'اتكما',
+u'اؤك',
+u'اؤكم',
+u'اؤكما',
+u'اؤكن',
+u'اؤنا',
+u'اؤه',
+u'اؤها',
+u'اؤهم',
+u'اؤهما',
+u'اؤهن',
+
+])
                                     
 def normalize_alef(word):
     """
@@ -293,12 +353,15 @@ class customStemmer_roots(abstractStemmer):
         abstractStemmer.__init__(self)
         infixes_letters_custom = u"توطيدا"
         self.set_infix_letters(infixes_letters_custom)
+        self.set_prefix_list(REVIEWED_PREFIX_LIST)
+        self.set_suffix_list(REVIEWED_SUFFIX_LIST)
         self.config["root_dict"] = "yes"
         self.rootdict = rootslibclass.rootDict()
     
     def getstem(self,word):
         """ get a stem from word"""
         if not is_stop(word):
+            word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
             return self.light_stem(word)
         else:
             return stop_stem(word)
@@ -306,6 +369,8 @@ class customStemmer_roots(abstractStemmer):
         """ get a stem from word"""
         if not is_stop(word):
             word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+            #~ word = re.sub(u"[%s]"%(araby.ALEF_MAKSURA), araby.YEH, word)
+            
             self.light_stem(word)
             self.segment(word)
             affixation_list = self.get_affix_list()
@@ -360,6 +425,11 @@ class customStemmer_roots_virtual(customStemmer_roots):
     def __init__(self,):
         customStemmer_roots.__init__(self)
         self.rootdict.algos = ['virtual']
+class customStemmer_roots_virtual_extend(customStemmer_roots):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        customStemmer_roots.__init__(self)
+        self.rootdict.algos = ['virtual', 'extend']
 
 class customStemmer_roots_matrix(abstractStemmer):
     """ I will make more options for stemmer """
@@ -784,6 +854,7 @@ class factory_stemmer(object):
         "rhyzome",
         "extend",
         "virtual",
+        "virtual+extend",
         ]
         return namelist
     @staticmethod
@@ -828,6 +899,8 @@ class factory_stemmer(object):
             asl = customStemmer_roots_rhyzome()
         elif name == "virtual":
             asl = customStemmer_roots_virtual()
+        elif name == "virtual+extend":
+            asl = customStemmer_roots_virtual_extend()
         elif name == "custom-root-matrix":
             asl = customStemmer_roots_matrix()
         elif name == "custom-tag-root":

@@ -111,7 +111,7 @@ wazns_lines = u"""فلل;nominal
 مفالة;nominal
 مفعلة;nominal
 فاعي;nominal
-مفعY;nominal
+مفعى;nominal
 فعايل;nominal
 أفعال;nominal
 أفعاع;nominal
@@ -183,8 +183,8 @@ wazns_lines = u"""فلل;nominal
 فعلاء;adjectival
 أفلاء;adjectival
 أفلة;adjectival
-فعلY;adjectival
-فعالY;adjectival
+فعلى;adjectival
+فعالى;adjectival
 فعال;nominal
 أفلة;nominal
 أفعلة;nominal
@@ -246,7 +246,7 @@ wazns_lines = u"""فلل;nominal
 فعالا;nominal
 أفعلاء;nominal
 فعل;adjectival
-فعلY;adjectival
+فعلى;adjectival
 فعل;adjectival
 فعيلة;nominal
 فعل;nominal
@@ -322,19 +322,19 @@ wazns_lines = u"""فلل;nominal
 فعة;nominal
 فعلة;nominal
 فعل;nominal
-فعلY;adjectival
+فعلى;adjectival
 فعل;adjectival
 فعال;adjectival
 فعلة;nominal
-فعY;nominal
+فعى;nominal
 فعال;nominal
 فالة;nominal
 فواعل;nominal
 فعلة;nominal
-فعلY;nominal
+فعلى;nominal
 فعل;nominal
 فعلان;nominal
-فعY;nominal
+فعى;nominal
 فاع;nominal
 فعاة;nominal
 فاعل;nominal/adjectival
@@ -342,7 +342,7 @@ wazns_lines = u"""فلل;nominal
 آعل;nominal/adjectival
 فعلة;participial
 فعل;participial
-فعلY;participial
+فعلى;participial
 فعال;participial
 فواعل;participial
 فعلان;participial
@@ -350,17 +350,17 @@ wazns_lines = u"""فلل;nominal
 فع;nominal
 فعلة;nominal
 فعل;adjectival
-فعلY;adjectival
+فعلى;adjectival
 فعلة;nominal
 فعال;nominal
 فعلان;adjectival
 فعال;adjectival
-فعلY;adjectival
+فعلى;adjectival
 فعلان;adjectival
 فعالا;adjectival
 فع;nominal
 فعول;nominal
-أفعY;adjectival
+أفعى;adjectival
 فعلان;adjectival
 فوعل;nominal
 فواعل;nominal
@@ -380,11 +380,11 @@ wazns_lines = u"""فلل;nominal
 فعائل;nominal
 فعلاء;nominal
 فعالي;nominal
-فعلY;nominal
-فعالY;nominal
+فعلى;nominal
+فعالى;nominal
 فعلاء;nominal
-فعالY;nominal
-فعالY;adjectival
+فعالى;nominal
+فعالى;adjectival
 فعللة;nominal
 فعالل;nominal
 فعللة;nominal
@@ -465,41 +465,41 @@ wazns_lines = u"""فلل;nominal
 تفعيل;nominal
 مفاعلة;nominal
 فعللة;nominal
-{ستفعال;nominal
-{ستيفال;nominal
+استفعال;nominal
+استيفال;nominal
 تفعل;nominal
 تفعي;nominal
 تفع;nominal
 مفعل;nominal
 مفعل;nominal
-{نفعال;nominal
+انفعال;nominal
 فعل;nominal
 فعل;nominal
 فعل;nominal
-{فتعال;nominal
-{فعال;nominal
+افتعال;nominal
+افعال;nominal
 فعال;nominal
 فعول;nominal
 فعولة;nominal
 تفاعل;nominal
 تفاعي;nominal
 تفاع;nominal
-{ستفالة;nominal
+استفالة;nominal
 فعل;nominal
 فعالة;nominal
 تفعلة;nominal
 تفعلل;nominal
-{فعلال;nominal
-{تعال;nominal
+افعلال;nominal
+اتعال;nominal
 إفعاء;nominal
 مفاعاة;nominal
-{نفعاء;nominal
+انفعاء;nominal
 فعلة;nominal
-{نفعالة;nominal
+انفعالة;nominal
 فعي;nominal
-{ستفالة;nominal
+استفالة;nominal
 أفالة;nominal
-{فتعالة;nominal
+افتعالة;nominal
 تفعيلة;nominal
 ...ية;nominal
 مفعل;nominal
@@ -543,7 +543,7 @@ wazns_lines = u"""فلل;nominal
 مفعل;nominal/adjectival
 مفاعل;nominal/adjectival
 مفعل;nominal/adjectival
-مفعY;nominal/adjectival
+مفعى;nominal/adjectival
 موفل;nominal/adjectival
 مفل;nominal/adjectival
 مفال;nominal/adjectival
@@ -591,7 +591,7 @@ wazns_lines = u"""فلل;nominal
 مستفيل;adjectival
 أفعل;adjectival
 أفع;adjectival
-فعلY;adjectival
+فعلى;adjectival
 مفعل;nominal
 مفعل;nominal
 مستفعل;nominal
@@ -621,12 +621,12 @@ wazns_lines = u"""فلل;nominal
 تفاع;nominal
 فعولل;nominal
 أفعلان;nominal
-فعالY;nominal
+فعالى;nominal
 فعل;nominal
 فعل;nominal
 فعللان;nominal
 فعللان;nominal
-{فعلعان;nominal
+افعلعان;nominal
 فعللان;nominal
 فولان;nominal
 فعل;nominal
@@ -639,44 +639,44 @@ wazns_lines = u"""فلل;nominal
 فال;unspec
 آل;unspec
 فعيل;unspec
-فعY;unspec
+فعى;unspec
 فع;unspec
 فعا;unspec
 فعلل;unspec
 فعل;unspec
-فعY;unspec
+فعى;unspec
 فعا;unspec
 فاعل;unspec
-فاعY;unspec
+فاعى;unspec
 أفعل;unspec
 أفع;unspec
 آعل;unspec
 أفال;unspec
-أفعY;unspec
+أفعى;unspec
 تفعل;unspec
-تفعY;unspec
+تفعى;unspec
 تفاعل;unspec
-تفاعY;unspec
-{نفعل;unspec
-{نفال;unspec
-{نفعY;unspec
-{نفل;unspec
-{فتعل;unspec
-{فطعل;unspec
-{فعال;unspec
-{فعل;unspec
-{فتال;unspec
-{فتل;unspec
-{فتعY;unspec
-{تعل;unspec
-{فعل;unspec
-{ستفعل;unspec
-{ستفعY;unspec
-{ستفال;unspec
-{ستفل;unspec
-{فعوعل;unspec
+تفاعى;unspec
+انفعل;unspec
+انفال;unspec
+انفعى;unspec
+انفل;unspec
+افتعل;unspec
+افطعل;unspec
+افعال;unspec
+افعل;unspec
+افتال;unspec
+افتل;unspec
+افتعى;unspec
+اتعل;unspec
+افعل;unspec
+استفعل;unspec
+استفعى;unspec
+استفال;unspec
+استفل;unspec
+افعوعل;unspec
 تفعلل;unspec
-{فعلل;unspec""".split('\n')
+افعلل;unspec""".split('\n')
 ROOTONS = []
 def generate_rooton_list():
     global ROOTONS
@@ -684,12 +684,12 @@ def generate_rooton_list():
         fields = l.split(';')
         wazn = fields[0]
         # extract rooton
-        left = wazn.find(u'ف',1)
+        left = wazn.find(u'ف')
         if left <0:
-            left = wazn.find(u'ع',1)
-        right = wazn.find(u'ل',-1)
+            left = wazn.find(u'ع')
+        right = wazn.rfind(u'ل')
         if right <0:
-            right = wazn.find(u'ع',-1)
+            right = wazn.rfind(u'ع')
         
         rooton = wazn[left:right+1]
         print u"\t".join([wazn, rooton])

@@ -99,6 +99,8 @@ test_all: test words test_some gold quranic_corpus qc quran_index qi nafis qwc k
 # only mentioned stemmers 
 test_some:OPTIONS=
 test_some:test_all
+words_some:OPTIONS=
+words_some:words
 
 
 test words test_some gold quranic_corpus qc quran_index qi nafis qwc kb:
@@ -145,13 +147,14 @@ visualize:
 # debug rooter
 debug_qwc:
 	python scripts/test_rooters_debug.py -f samples/qwc.csv -o output/qwc.debug.csv > output/qwc.debug
+debug_nafis:
+	python scripts/test_rooters_debug.py -f samples/nafis2.unq -o output/nafis.debug.csv > output/nafis.debug
+debug_gold:
+	python scripts/test_rooters_debug.py -f samples/gold.csv -o output/gold.debug.csv > output/gold.debug
 debug:
 	python scripts/test_rooters_debug.py -f samples/words_debug.csv -o output/word_debug.csv > output/words.debug
-debug_qwc_win:
-	python scripts\test_rooters_debug.py -f samples\qwc.csv -o output\qwc.debug.csv > output\qwc.debug
-debug_win:
-	python scripts\test_rooters_debug.py -f samples\words_debug.csv -o output\word_debug.csv > output\words.debug
-
+show_result:
+	python scripts/test_show_result.py -f output/words.csv -o output/word.reduced.csv
 
 matrix:
 	python scripts/test_root_matrix.py -f samples/words_debug.csv -o output/word_debug.csv > output/words.matrix 
@@ -159,3 +162,27 @@ matrix_qwc:
 	python scripts/test_root_matrix.py -f samples/qwc.csv -o output/qwc_debug.csv > output/qwc.matrix 
 qalsadi:
 	python scripts/test_analex.py > output/text.txt
+
+
+test_some_win:
+	# test stemmers with quran index dataset
+	# run stemmer
+	python scripts\test_stemmers_rooters.py -f samples\gold.csv -o output\gold.csv --dir samples
+	python scripts\test_stemmers_rooters.py -f samples\qc.unq -o output\qc.unq --dir samples
+	python scripts\test_stemmers_rooters.py -f samples\qi.csv -o output\qi.csv --dir samples
+	python scripts\test_stemmers_rooters.py -f samples\nafis.unq -o output\nafis.unq --dir samples
+	python scripts\test_stemmers_rooters.py -f samples\words.csv -o output\words.csv --dir samples
+	python scripts\test_stemmers_rooters.py -f samples\qwc.csv -o output\qwc.csv --dir samples
+	python scripts\test_stemmers_rooters.py -f samples\kabi.csv -o output\kabi.csv --dir samples
+
+eval_some_win:
+	# test stemmers with quran index dataset
+	# run stemmer
+	python scripts\eval_stemming_result.py -f output\gold.csv -o output\gold.csv.stats 
+	python scripts\eval_stemming_result.py -f output\qc.unq -o output\qc.unq.stats
+	python scripts\eval_stemming_result.py -f output\qi.csv -o output\qi.csv.stats
+	python scripts\eval_stemming_result.py -f output\nafis.unq -o output\nafis.unq.stats
+	python scripts\eval_stemming_result.py -f output\words.csv -o output\words.csv.stats
+	python scripts\eval_stemming_result.py -f output\qwc.csv -o output\qwc.csv.stats
+	python scripts\eval_stemming_result.py -f output\kabi.csv -o output\kabi.csv.stats
+

@@ -27,6 +27,8 @@ import argparse
 import os
 import abstractstemmer
 import pandas as pd
+import pyarabic.araby as araby
+from stopwords.arabicstopwords import is_stop
 from test_stemmers_rooters import calcul_stats
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
 
@@ -49,7 +51,17 @@ def grabargs():
     args = parser.parse_args()
     return args
 
-
+def is_valid_word(word):
+    """
+    The word is removed if it's not an arabic word or it's a stop word
+    """
+    if is_stop(word):
+        return False
+    elif not araby.is_arabicword(word):
+        return False
+    else:
+        return True
+        
 def main():
         
     args =grabargs()
@@ -73,6 +85,9 @@ def main():
     # prepare stemmers
     import numpy as np
     df = df.replace(np.nan, '', regex=True)
+    # avoid stopwords and invalid words
+    df['valid']= df['word'].apply(is_valid_word)
+    df = df[df['valid'] == True]
     if all_stemmers:
         names = abstractstemmer.factory_stemmer.get_stemmers();
         names.extend(['khoja','farasa'])
@@ -80,11 +95,11 @@ def main():
         names =["default",
         #~ "custom-tag-root",
         #~ "custom-tag",
-        "isri",
-        "khoja",
-        "farasa",
+        #~ "isri",
+        #~ "khoja",
+        #~ "farasa",
         #~ "isri+rooter",
-        "assem",
+        #~ "assem",
         #~ "assem-stemmer",
         #~ "assem+rooter",
         #~ "khoja+rooter",
@@ -92,15 +107,16 @@ def main():
         #~ "custom-affix",
         #~ "custom-affix-stp",
         "custom-root",
-        "custom-root-matrix",
+        #~ "custom-root-matrix",
         #~ "custom-stp",
         #~ "rooter-only",
         #~ "multi",
         #~ "lemmatizer",
         "rhyzome",
-        "stamp",
-        "extend",
-        "virtual",
+        #~ "stamp",
+        #~ "extend",
+        #~ "virtual",
+        #~ "virtual+extend",
         ]
 
         

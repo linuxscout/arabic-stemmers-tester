@@ -151,7 +151,9 @@ def test_rooter_matrix(dataframe_result):
         root_result, str(root_result in root_list)])).encode('utf8'))
         if root_result in  root_list:
             cpt += 1            
-    print("***** Percent %.2f%%"%(cpt*100/total))            
+    #~ print("***** Percent %.2f%%"%(cpt*100/total)) 
+    print("***** Percent %.2f%% [%d/%d]"%(cpt*100.0/total, cpt, total))
+    
 
 
 def test2():

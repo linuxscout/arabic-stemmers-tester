@@ -9,105 +9,6 @@ import pyarabic.araby as araby
 import xml.dom.minidom as minidom
 #~ import xml.dom  as minidom
 import sys
-def display_personnes(xmldoc):
-    #get the personnes list
-    personnes = xmldoc.getElementsByTagName('personne')
-    print personnes
-    cpt = 0
-    # display personne by personne
-    for personne  in personnes:
-        print "-"*40
-        print "Personne n°", cpt
-        print personne.toxml()
-        cpt += 1
-def display_tel(xmldoc):
-    # display only telephones
-     # get the tel list
-    telephones = xmldoc.getElementsByTagName('telephone')
-    print telephones
-    cpt = 0
-    # display tel by tel
-    for tel  in telephones:
-        print "-"*40
-        print "Tel n°", cpt
-        print tel.toxml()
-        print "N°:",tel.firstChild.data
-        print "Type:",tel.getAttribute("type")
-        cpt += 1
-        
-def display_tel_personne(xmldoc):
-    #get the personnes list
-    personnes = xmldoc.getElementsByTagName('personne')
-    print personnes
-    cpt = 0
-    # display telephone by personne
-    for personne  in personnes:
-        print "-"*40
-        print "Personne n°", cpt
-        nom    = personne.getElementsByTagName('nom')[0]
-        prenom = personne.getElementsByTagName('prenom')[0]
-        tels   = personne.getElementsByTagName('telephone')
-        print "*"*20
-        print "Nom:\t",nom.firstChild.data
-        print "Prénom:\t",prenom.firstChild.data
-        for tel in tels:
-            print "-"*20
-            print "N°:",tel.firstChild.data
-            print "Type:",tel.getAttribute("type")
-        cpt += 1
-def add_id_personne(xmldoc):
-    #get the personnes list
-    personnes = xmldoc.getElementsByTagName('personne')
-    print personnes
-    cpt = 0
-    # display personne by personne
-    for personne  in personnes:
-        print "-"*40
-        print "Personne n°", cpt, personne.nodeValue, personne.nodeType,
-        personne.setAttribute('id', str(cpt))
-        cpt += 1 
-        print personne.toxml()
-def add_child_personne(xmldoc):
-    #get the personnes list
-    personnes = xmldoc.getElementsByTagName('personne')
-    print personnes
-    cpt = 0
-  
-    # display personne by personne
-    for personne  in personnes:
-        print "-"*40
-        print "Personne n°", cpt, personne.nodeValue, personne.nodeType,
-        personne.setAttribute('id', str(cpt))
-        cpt += 1 
-        fils = xmldoc.createElement("age") 
-        #~ fils_text = xmldoc.createTextNode("24") 
-        #~ fils.appendChild(fils_text)
-        fils.insertData("TAHAHAAHAHA")
-        personne.appendChild(fils)      
-        print personne.toxml()
-        f = personne.getElementsByTagName('nom')[0]
-        personne.removeChild(f) 
-        #~ personne.removeChild("age") 
-        print personne.toxml()          
-
-def lookup_for_tel(xmldoc, tel_num):
-    #get the personnes list
-    tels = xmldoc.getElementsByTagName('telephone')
-    print tels
-    # display tel
-    for tel in tels:
-        tel_type = tel.getAttribute('type')
-        tel_number     = tel.firstChild.data
-        if tel_number == tel_num:
-            adresse  = tel.parentNode
-            identite = adresse.parentNode
-            print "owner", identite.toxml()
-            for elem in identite.childNodes:
-                print "---- element----"
-                print elem.toxml()
-            nom      = identite.childNodes[1].firstChild.data
-            print "owner", nom#.toxml()
-        print tel_type, tel_number
 def display_node(node, level):
     print "  "*level, "Type", node.nodeType, "Name:", node.nodeName , "nodevalue", node.nodeValue, 
     #~ print node.toxml()
@@ -136,14 +37,15 @@ def display_word_seg(xmldoc):
             for seg in segs:
                 #~ print seg.toxml()
                 members = choice.getElementsByTagName('m')
-                segment={"word":word_value, }
+                segment={"word":word_value,'root':[],'stem':[], 'prefix':[],'suffix':[], }
                 for mmbr in members:
                     mmbr_type = mmbr.getAttribute('type')
                     try:
                         mmbr_value = mmbr.firstChild.data
                     except:
                         mmbr_value = ""
-                    segment[mmbr_type] = mmbr_value
+                    if mmbr_value:
+                        segment[mmbr_type].append(mmbr_value)
                 #~ print (repr(segment)).decode('unicode-escape');
                 list_segments.append(segment)
     return list_segments
@@ -189,7 +91,12 @@ def main():
     #~ display_word(xmldoc)
     segments = display_word_seg(xmldoc)
     for seg in segments:
-        print (u"\t".join([seg['word'], seg['root'], araby.strip_tashkeel(seg['stem']), seg['stem'] ]).encode('utf8'));
+        #~ seg['stem'] = [x for x in seg['stem'] if x]
+        #~ seg['root'] = [x for x in seg['root'] if x]
+        stems = u';'.join(set(seg['stem']))
+        stems_unvoc = u';'.join(set([araby.strip_tashkeel(x) for x in seg['stem']]))
+        roots = u';'.join(set(seg['root']))
+        print (u"\t".join([seg['word'], roots, stems_unvoc, stems ]).encode('utf8'));
 
     
     return 0

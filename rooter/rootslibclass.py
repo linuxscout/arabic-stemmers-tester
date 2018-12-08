@@ -33,90 +33,12 @@ from pyarabic.araby import FEH, LAM, AIN, HARAKAT
 from pyarabic.arabrepr import arepr
 import roots_const
 import re
-import itertools
-#create index  by word stampfor dictionary to accelerate word search.
-# the word stamp is the arabic word without any affixation  letters,
-# for example
-# the word قالب give قلب, by removing meem and beh, the word قوالب give قلب.
-# the stamp is used as a first level of indexing, especially
-# for verbs
-# the stamp pattern is used to create the word stamp
-AFFIXATION_LETTERS = u"أابةتدسطفكلمنهويءئى"
-   
-WAZNS = set([u'عاءل',
-         u'فوعل',
-         u'علل',
-         u'علول',
-         u'ضطعل',
-         u'فتال',
-         u'عليل',
-         u'عاعل',
-         u'فعال',
-         u'فعاءل',
-         u'فاءل',
-         u'ل',
-         u'عالل',
-         u'عال',
-         u'فتعيل',
-         u'فيعل',
-         u'فال',
-         u'عل',
-         u'علالل',
-         u'زدعل',
-         u'ع',
-         u'عايل',
-         u'عاليل',
-         u'فعوعل',
-         u'فل',
-         u'فتعل',
-         u'عولل',
-         u'فعلال',
-         u'فوعال',
-         u'عع',
-         u'فع',
-         u'عللول',
-         u'فاع',
-         u'عيل',
-         u'فيل',
-         u'فاعيل',
-         u'فتعال',
-         u'فاعول',
-         u'فعاع',
-         u'فول',
-         u'فعل',
-         u'فعيل',
-         u'عول',
-         u'فطعل',
-         u'فعول',
-         u'فيال',
-         u'علال',
-         u'فتل',
-         u'فعلل',
-         u'فاعل'])
-
-class rootDict:
-    """ a class to handle roots and lookup for roots """
-    def __init__(self, algos=[]):
-        self.STAMP_DICT   ={}
-        self.VIRTUAL_DICT ={}
-        self.stamp_pat = re.compile(u"[%s%s%s%s%s%s%s%s%s%s]"% (araby.ALEF, 
-    araby.YEH, araby.HAMZA, araby.ALEF_HAMZA_ABOVE, araby.WAW_HAMZA,
-     araby.YEH_HAMZA, araby.WAW, araby.ALEF_MAKSURA, araby.SHADDA, araby.TEH ), 
-     re.UNICODE)     
-
-        self.create_stamped_roots()
-        self.create_virtual_roots()
-        self.debug = False
-        self.use_cache = True
-        self.cache = {'virtual':{},
-        'rhyzome':{},
-        'stamped':{},
-        'extend':{},
-        }
-        self.algos =['virtual', 'stamp', 'extend', 'rhyzome']
-        if algos:
-            self.algos = algos
-
+import factory_rooter
+        
+class rootDictionary:
+    """ lookup for root list """
+    def __init__(self,):
+        pass
     @staticmethod
     def is_root(word):
         """ test if word is a root"""
@@ -129,98 +51,30 @@ class rootDict:
         word = word.replace(araby.TEH_MARBUTA, '')
         word = word.replace(araby.ALEF_MAKSURA, araby.YEH)
         return araby.normalize_hamza(word)
+      
+class rootDict:
+    """ a class to handle roots and lookup for roots """
+    def __init__(self, algos=[]):
+        self.is_root = rootDictionary.is_root
+        self.normalize_root = rootDictionary.normalize_root
+
+
+        self.debug = False
+        self.use_cache = False
+        self.cache = {'virtual':{},
+        'rhyzome':{},
+        'stamped':{},
+        'extend':{},
+        }
+        self.algos =['virtual', 'stamp', 'extend', 'rhyzome']
+        if algos:
+            self.algos = algos
         
-    @staticmethod
-    def extend_root(psudoroot, wazn =""):
-        """ extend a psudo root"""
-        extended = []
-        # convert ALEF to WAW or YEH
-        if araby.ALEF in psudoroot:
-            extended.append(psudoroot.replace(araby.ALEF, araby.WAW))
-            extended.append(psudoroot.replace(araby.ALEF, araby.YEH))
-        #~ if len(psudoroot) == 3 and araby.YEH in psudoroot:
-            #~ extended.append(psudoroot.replace(araby.YEH, araby.WAW))
-        #~ if len(psudoroot) == 3 and araby.WAW in psudoroot:
-            #~ extended.append(psudoroot.replace(araby.WAW, araby.YEH))
-            #~ extended.append(psudoroot.replace(araby.ALEF, araby.YEH))
-        # extend root according to length,
-        # if wazn (rooton) is given we can know where to add missed letter
-        if not wazn:
-            if psudoroot in (u'خذ',u'مر',u'كل'):
-                extended.append(araby.HAMZA + psudoroot)
-            if len(psudoroot) == 2:
-                # add Yeh or waw at begin
-                extended.append(araby.WAW + psudoroot)
-                #~ extended.append(araby.YEH + psudoroot)
-                #~ extended.append(araby.HAMZA + psudoroot)
-                # add Yeh or waw at middle
-                extended.append("".join([psudoroot[0],araby.WAW, psudoroot[1]]))
-                extended.append("".join([psudoroot[0],araby.YEH, psudoroot[1]]))
-                # add Yeh or waw at end
-                extended.append(psudoroot+araby.WAW)
-                extended.append(psudoroot+araby.YEH)
-                # add double letter جد =>جدد
-                extended.append(psudoroot + psudoroot[-1:])
-            #~ if len(psudoroot) == 1:
-                #~ #is a begin
-                #~ extended.append(psudoroot + araby.WAW  + araby.YEH )
-                #~ extended.append(psudoroot + araby.YEH  +araby.WAW  )        
-                #~ # is middle
-                #~ extended.append(araby.WAW + psudoroot + araby.YEH )
-                #~ extended.append(araby.WAW + psudoroot*2 )
-                #~ extended.append(araby.YEH + psudoroot +araby.WAW)
-                #~ extended.append(araby.YEH + psudoroot *2)        
-                #~ extended.append(araby.HAMZA + psudoroot + araby.YEH )
-                #~ extended.append(araby.HAMZA + psudoroot*2 )
-                #~ extended.append(araby.HAMZA + psudoroot +araby.WAW)
-                
-                
-                #~ #is end
-                #~ extended.append(araby.WAW  + araby.YEH + psudoroot)
-                #~ extended.append(araby.YEH  +araby.WAW  + psudoroot)          
-        else:
-            # given roots are
-            if araby.FEH not in wazn:
-                # add FEH
-                # possible YEH, WAW
-                # add Yeh or waw at begin
-                extended.append(araby.WAW + psudoroot)
-                extended.append(araby.HAMZA + psudoroot)
-                #~ extended.append(araby.YEH + psudoroot)
-                
-            if araby.AIN not in wazn:
-                #add AIN
-                # possible َAdjwaf
-                # add Yeh or waw at middle
-                if len(psudoroot) == 2:
-                    extended.append("".join([psudoroot[0],araby.WAW, psudoroot[1]]))
-                    extended.append("".join([psudoroot[0],araby.YEH, psudoroot[1]]))
-
-            if araby.LAM not in wazn:
-                #add LAM
-                # possible double مضعف
-                # possible maqsur
-                # add Yeh or waw at end
-                extended.append(psudoroot+araby.WAW)
-                extended.append(psudoroot+araby.YEH)
-                # add double letter جد =>جدد
-                extended.append(psudoroot + psudoroot[-1:])
-                
-                        
-            if False and len(psudoroot) == 2:
-                # add Yeh or waw at begin
-                extended.append(araby.WAW + psudoroot)
-                extended.append(araby.YEH + psudoroot)
-                # add Yeh or waw at middle
-                extended.append("".join([psudoroot[0],araby.WAW, psudoroot[1]]))
-                extended.append("".join([psudoroot[0],araby.YEH, psudoroot[1]]))
-                # add Yeh or waw at end
-                extended.append(psudoroot+araby.WAW)
-                extended.append(psudoroot+araby.YEH)
-                # add double letter جد =>جدد
-                extended.append(psudoroot + psudoroot[-1:])
-
-        return extended
+        self.rhyzome_rooter = factory_rooter.factory_rooter.create_rooter('rhyzome')
+        self.stamp_rooter = factory_rooter.factory_rooter.create_rooter('stamp')
+        self.virtual_rooter = factory_rooter.factory_rooter.create_rooter('virtual')
+        self.extend_rooter = factory_rooter.factory_rooter.create_rooter('extend')
+        self.matrix_rooter = factory_rooter.factory_rooter.create_rooter('matrix')
 
     @staticmethod
     def most_common(lst):
@@ -228,155 +82,6 @@ class rootDict:
         if triroots:
             lst = triroots
         return max(set(lst), key=lst.count)
-
-    def stamp_root(self, word):
-        """ stamp root"""
-        return self.word_stamp(word)
-
-
-    def word_stamp(self, word):
-        """
-        generate a stamp for a word, 
-        remove all letters which can change form in the word :
-            - ALEF, 
-            - HAMZA, 
-            - YEH, 
-            - WAW, 
-            - ALEF_MAKSURA
-            - SHADDA
-        @return: stamped word
-        """
-        word = self.stamp_pat.sub('', word)
-        # strip the last letter if is doubled
-        if word[-1:] ==  word[-2:-1]:
-            word = word[:-1]
-        return word
-
-
-    
-    def create_stamped_roots(self, ):
-        if  self.STAMP_DICT:
-            return
-
-        for root in roots_const.ROOTS:
-            stmp =  self.word_stamp(root)
-            #~ if stmp != root:
-            if stmp in  self.STAMP_DICT:
-                 self.STAMP_DICT[stmp].append(root)
-            else:
-                 self.STAMP_DICT[stmp]= [root,]
-    @staticmethod
-    def virtualize_root(word):
-        """ convert Weak letters into One code """
-        word = word.replace(araby.ALEF, "?")
-        word = word.replace(araby.YEH, "?")
-        word = word.replace(araby.WAW, "?")
-        word = word.replace(araby.ALEF_MAKSURA, "?")
-        return word
-    
-
-    def create_virtual_roots(self, ):
-        if  self.VIRTUAL_DICT:
-            return
-
-        for root in roots_const.ROOTS:
-            vrtl =  self.virtualize_root(root)
-            #~ if vrtl != root:
-            if vrtl in  self.VIRTUAL_DICT:
-                 self.VIRTUAL_DICT[vrtl].append(root)
-            else:
-                 self.VIRTUAL_DICT[vrtl]= [root,]
-
-
-    def is_stamped_root(self, word):
-        """ test if word is a stop"""
-        # calcul the stamp
-        stmp =  self.word_stamp(word)
-        # lookup for stamp roots
-        return  self.STAMP_DICT.get(stmp, [])
-
-    def is_virtual_root(self, word):
-        """ test if word is a valid virtual root"""
-        # calcul the virtual root
-        vrtl =  self.virtualize_root(word)
-        # lookup for virtual roots
-        return  self.VIRTUAL_DICT.get(vrtl, [])
-
-    @staticmethod
-    def waznlike2(word1, wazn, extract_root = False):
-        u"""If the  word1 is like a wazn (pattern),
-        the letters must be equal,
-        the wazn has FEH, AIN, LAM letters.
-        this are as generic letters.
-        The two words can be full vocalized, or partial vocalized
-
-        Example:
-            >>> word1 = u"ضارب"
-            >>> wazn = u"فَاعِل"
-            >>> araby.waznlike(word1, wazn)
-            True
-
-        @param word1: input word
-        @type word1: unicode
-        @param wazn: given word template  وزن
-        @type wazn: unicode
-        @param extract_root: return the root
-        @type extract_root: unicode
-        @return: if two words have similar vocalization
-        @rtype: Boolean
-        """
-        stack1 = stack.Stack(word1)
-        stack2 = stack.Stack(wazn)
-        root = stack.Stack()
-        last1 = stack1.pop()
-        last2 = stack2.pop()
-        vowels = HARAKAT
-        while last1 != None and last2 != None:
-            if last1 == last2 and last2 not in (FEH, AIN, LAM):
-                last1 = stack1.pop()
-                last2 = stack2.pop()
-            elif last1 not in vowels and last2 in (FEH, AIN, LAM):
-                root.push(last1)
-                #~ print "t"
-                last1 = stack1.pop()
-                last2 = stack2.pop()
-            elif last1 in vowels and last2 not in vowels:
-                last1 = stack1.pop()
-            elif last1 not in vowels and last2 in vowels:
-                last2 = stack2.pop()
-            else:
-                break
-        # reverse the root letters
-        root.items.reverse()
-        #~ print " the root is ", root.items#"".join(root.items)
-        if not (stack1.is_empty() and stack2.is_empty()):
-            return False
-        # if one letter is remind after pop in one stack
-        elif last1 != None or last2 != None:
-            return False
-        else:
-            #~ print (u"word '%s' , wazn ='%s'"%(u"".join(stack1.items),u"".join(stack2.items))).encode('utf8') 
-            if extract_root:
-                return "".join(root.items)
-            else:
-                return True
-    def valid_starstem(self, starword):
-        
-        """ validate starwoord agnaist Schemes أوزان"""
-        accepted_wazns = []
-        for wazn in WAZNS:
-            #~ if araby.waznlike(starword,wazn):
-            if len(wazn) == len(starword):
-                root = self.waznlike2(starword, wazn, extract_root = True)
-                if root:
-                  accepted_wazns.append(root)
-                  # extend roots to add removed letters according to wazn              
-                  extended = self.extend_root(root, wazn)
-                  
-                  accepted_wazns.extend(extended)
-                  if self.debug:
-                      print(u"\t".join([starword, wazn,root, u";".join(extended)]).encode('utf8'))
-        return accepted_wazns
 
     @staticmethod
     def filter_root_length_valid(roots):
@@ -411,6 +116,100 @@ class rootDict:
         #roots
         stems = [ self.normalize_root(d['stem']) for d in affixation_list]
         roots = [ self.normalize_root(d['root']) for d in affixation_list]
+        prefixes = [ d['prefix'] for d in affixation_list]
+        suffixes = [ d['suffix'] for d in affixation_list]
+        #~ print("rootslibclass:", arepr(affixation_list))
+     
+        
+        # Virtual roots
+        if (all_algo or not accepted) and 'virtual' in self.algos :#and False:
+            # try to virtualize roots
+            virtual_roots = []
+            #~ for x in roots:
+            candidat_stems =  [x for x in stems if len(x) >= 3 and len(x)<=4]
+            # virtual roots will be applied on roots also
+            candidat_stems.extend(roots)
+            for x in stems:
+                if x not in self.cache['virtual']:
+                    self.cache['virtual'][x] = self.virtual_rooter.extract(x) 
+                virtual_roots.extend(self.cache['virtual'][x])
+                    
+            roots_tmp =  self.filter_root_length_valid(virtual_roots)
+            # lookup for real roots
+            #~ accepted = filter(is_root, roots_tmp)
+            accepted = roots_tmp
+            all_accepted.extend(accepted)
+            self.debug_algo(debug, word, 3, "virtual roots", candidat_stems, virtual_roots, roots_tmp, accepted)
+
+
+        # Tiny Scheme extraction
+        if (all_algo or not accepted) and 'rhyzome' in self.algos :
+            # try to extract roots from stems
+
+            wazn_roots = []
+            for x, p, s in zip(stems,prefixes, suffixes):
+                #~ wazn_roots.extend(self.valid_starstem(x))
+                if self.use_cache:
+                    if x in self.cache['rhyzome']:
+                        extract_roots = self.cache['rhyzome'][x]
+                    else:
+                        extract_roots = self.rhyzome_rooter.extract(x, p, s)
+                        self.cache['rhyzome'][x] = extract_roots
+                else:
+                    extract_roots = self.rhyzome_rooter.extract(x, p, s) 
+
+                wazn_roots.extend(extract_roots)
+            #~ accepted = filter(.is_root, ampted_roots )
+            roots_tmp =  self.filter_root_length_valid(wazn_roots)
+            # lookup for real roots
+            accepted = filter( self.is_root, roots_tmp)
+            all_accepted.extend(accepted)
+            #~ accepted = roots_tmp
+            self.debug_algo(debug, word, 4, "Rhyzome roots", stems, wazn_roots, roots_tmp, accepted)
+            #~ if not all_accepted:
+                #~ print("rootslibclass:####")
+
+
+        # Extending roots
+        if (all_algo or not accepted) and 'extend' in self.algos :
+        #~ if False :#not accepted:
+            # try to extend roots
+            extended_roots = []
+            for x in roots:
+                #~ extended_roots.extend( self.extend_root(x))
+                if x not in self.cache['extend']:
+                    #~ self.cache['extend'][x] = self.extend_root(x)                
+                    self.cache['extend'][x] = self.extend_rooter.extract(x)                
+                extended_roots.extend(self.cache['extend'][x])
+            roots_tmp =  self.filter_root_length_valid(extended_roots)
+            # lookup for real roots
+            accepted = filter( self.is_root, roots_tmp)
+            all_accepted.extend(accepted)            
+            self.debug_algo(debug, word, 5, "extended roots", roots, extended_roots, roots_tmp, accepted)
+
+        # stamped roots
+        if (all_algo or not accepted) and 'stamp' in self.algos:
+        #~ if False :#not accepted:
+            # try to extend roots
+            stamped_roots = []
+            #~ for x in roots:
+            for x in stems:
+                #~ stamped_roots.extend(self.is_stamped_root(x))
+                if x not in self.cache['stamped']:
+                    self.cache['stamped'][x] = self.stamp_rooter.extract(x)
+                stamped_roots.extend(self.cache['stamped'][x])
+
+            #~ accepted = filter(is_root, sampted_roots )
+            roots_tmp =  self.filter_root_length_valid(stamped_roots)
+            #don't need to filter roots because stamps do it
+            # lookup for real roots
+            #~ accepted = filter(is_root, roots_tmp)
+            accepted = roots_tmp
+            all_accepted.extend(accepted)            
+            self.debug_algo(debug, word, 6, "stamped roots", stems, stamped_roots, roots_tmp, accepted)
+
+        # default
+        #~ if not all_accepted :#all_algo or not accepted:
         if all_algo or not accepted:
 
             # get uniq root
@@ -429,6 +228,7 @@ class rootDict:
             all_accepted.extend(accepted)
 
         # Stems as roots
+        #~ if not all_accepted :#all_algo or not accepted:
         if all_algo or not accepted:
 
             # avoid non 3-4 letters roots
@@ -437,86 +237,9 @@ class rootDict:
             accepted = filter( self.is_root, roots_tmp)
             all_accepted.extend(accepted)            
             self.debug_algo(debug, word, 2 , "default as stem", stems, stems, roots_tmp, accepted)
-
-        # Virtual roots
-        if (all_algo or not accepted) and 'virtual' in self.algos :#and False:
-            # try to virtualize roots
-            virtual_roots = []
-            #~ for x in roots:
-            candidat_stems =  [x for x in stems if len(x) >= 3 and len(x)<=4]
-            # virtual roots will be applied on roots also
-            candidat_stems.extend(roots)
-            for x in stems:
-                if x not in self.cache['virtual']:
-                    self.cache['virtual'][x] = self.is_virtual_root(x) 
-                virtual_roots.extend(self.cache['virtual'][x])
-                    
-            roots_tmp =  self.filter_root_length_valid(virtual_roots)
-            # lookup for real roots
-            #~ accepted = filter(is_root, roots_tmp)
-            accepted = roots_tmp
-            all_accepted.extend(accepted)
-            self.debug_algo(debug, word, 3, "virtual roots", candidat_stems, virtual_roots, roots_tmp, accepted)
-
-
-        # Tiny Scheme extraction
-        if (all_algo or not accepted) and 'rhyzome' in self.algos :
-            # try to extract roots from stems
-
-            wazn_roots = []
-            for x in stems:
-                #~ wazn_roots.extend(self.valid_starstem(x))
-                if x not in self.cache['rhyzome']:
-                    self.cache['rhyzome'][x] = self.valid_starstem(x)               
-
-                wazn_roots.extend(self.cache['rhyzome'][x])
-            #~ accepted = filter(.is_root, ampted_roots )
-            roots_tmp =  self.filter_root_length_valid(wazn_roots)
-            # lookup for real roots
-            accepted = filter( self.is_root, roots_tmp)
-            all_accepted.extend(accepted)
-            #~ accepted = roots_tmp
-            self.debug_algo(debug, word, 4, "Rhyzome roots", stems, wazn_roots, roots_tmp, accepted)
-
-
-
-        # Extending roots
-        if (all_algo or not accepted) and 'extend' in self.algos :
-        #~ if False :#not accepted:
-            # try to extend roots
-            extended_roots = []
-            for x in roots:
-                #~ extended_roots.extend( self.extend_root(x))
-                if x not in self.cache['extend']:
-                    self.cache['extend'][x] = self.extend_root(x)                
-                extended_roots.extend(self.cache['extend'][x])
-            roots_tmp =  self.filter_root_length_valid(extended_roots)
-            # lookup for real roots
-            accepted = filter( self.is_root, roots_tmp)
-            all_accepted.extend(accepted)            
-            self.debug_algo(debug, word, 5, "extended roots", roots, extended_roots, roots_tmp, accepted)
-
-        # stamped roots
-        if (all_algo or not accepted) and 'stamp' in self.algos:
-        #~ if False :#not accepted:
-            # try to extend roots
-            stamped_roots = []
-            #~ for x in roots:
-            for x in stems:
-                #~ stamped_roots.extend(self.is_stamped_root(x))
-                if x not in self.cache['stamped']:
-                    self.cache['stamped'][x] = self.is_stamped_root(x)
-                stamped_roots.extend(self.cache['stamped'][x])
-
-            #~ accepted = filter(is_root, sampted_roots )
-            roots_tmp =  self.filter_root_length_valid(stamped_roots)
-            #don't need to filter roots because stamps do it
-            # lookup for real roots
-            #~ accepted = filter(is_root, roots_tmp)
-            accepted = roots_tmp
-            all_accepted.extend(accepted)            
-            self.debug_algo(debug, word, 6, "stamped roots", stems, stamped_roots, roots_tmp, accepted)
-
+        # as stem_default and default are not exact method, we can reduce their effect
+        # by reducing generated roots to a set
+        #~ all_accepted = list(set(all_accepted))   
         if all_algo and all_accepted: 
             return  self.most_common(all_accepted)
         elif accepted:
@@ -524,7 +247,6 @@ class rootDict:
             return  self.most_common(accepted)
         else:
             return ''
-            
             
     def choose_root_matrix(self, word, affixation_list, debug = False):
         """ test an algorithm to choose roots by using matrix root algorithm"""
@@ -539,7 +261,7 @@ class rootDict:
         # get uniq root
         # avoid non 3-4 letters roots
         for stem in stems:
-            temp_list = self.matrix_root(stem,u'توطيدا')
+            temp_list = self.matrix_rooter.extract(stem,u'توطيدا')
             tmp_roots_part = [d['root'] for d in temp_list]
             roots.extend(tmp_roots_part)
 
@@ -555,22 +277,6 @@ class rootDict:
 
         self.debug_algo(debug, word, 1 , "Matrix", roots, roots, roots_tmp, accepted)
         
-        #~ # Tiny Scheme extraction
-        #~ # try to extract roots from stems
-        #~ wazn_roots = []
-        #~ for x in stems:
-            #~ if x not in self.cache['rhyzome']:
-                #~ self.cache['rhyzome'][x] = self.valid_starstem(x)               
-
-            #~ wazn_roots.extend(self.cache['rhyzome'][x])
-        #~ roots_tmp =  self.filter_root_length_valid(wazn_roots)
-        #~ # lookup for real roots
-        #~ accepted = filter( self.is_root, roots_tmp)
-        #~ all_accepted.extend(accepted)
-        #~ self.debug_algo(debug, word, 4, "Rhyzome roots", stems, wazn_roots, roots_tmp, accepted)
-
-
-        
         # to handle all accepted together
         if all_accepted:
             #select tri-letter before selecting 4 letters
@@ -578,163 +284,7 @@ class rootDict:
         else:
             return ''
         
-    def choose_wazn_root(self, affixation_list, debug=False):
-        """
-        Choose root according to wazns 
-        """
-        accepted = []
-        #roots
-        stems = [ self.normalize_root(d['stem']) for d in affixation_list]
-        #~ roots = [ self.normalize_root(d['root']) for d in affixation_list]
-        # Tiny Scheme extraction
-        wazn_roots = []
-        for x in stems:
-            wazn_roots.extend( self.valid_starstem(x))
-        #~ accepted = filter(.is_root, ampted_roots )
-        roots_tmp =  self.filter_root_length_valid(wazn_roots)
-        # lookup for real roots
-        accepted = filter( self.is_root, roots_tmp)
-        #~ accepted = roots_tmp
-        self.debug_algo(debug, 2, "stem scheme roots", stems,wazn_roots, roots_tmp, accepted)    
-        return accepted
-    
-    #~ @staticmethod
-    def matrix_root(self, word, affixation_letters = AFFIXATION_LETTERS):
-        """ extract all possibles roots as matrix """
-        # create the matrix columns values size
-        # if the word has n character, the columns size is n
-        # every columns has a number of poosible values,
-        # if the letter is original, the columns correspaneding to this letters has 1 case
-        # if the letter can be added, the columns takes two values (original, added)
-        # Qal => 1 2 1
-        # the number of possible cases is 1*2*1 
-        # Qwl and Qyl
-        # for ktab => 2,2,2,1 => number of rows is 8 cases
-        # k t a b
-        # 0 0 0 1 => b
-        # 0 0 1 1 => ab
-        # 0 1 0 1 => tb
-        # 0 1 1 1 => tab
-        # 1 0 0 1 => kb
-        # 1 0 1 1 => kab
-        # 1 1 0 1 => ktb
-        # 1 1 1 1 => ktab
-        # If we consider that 'a' can be 'w' or 'y' we can get more cases.
-        # we can elimine more the 4 letters root cases.
-        cards = [] # cardinalities
-        #~ affixation_letters = u"أابةتدسطفكلمنهويءئى"
-        #~ affixation_letters = u"أابةتدسطفكلمنهويءئى"
-        chunks = []
-        # previous letter, used to handle some special case
-        previous = ""
-        for c in word:
-
-            # only added
-            if c in (araby.TEH_MARBUTA, ):
-               chunks.append(['-'])
-
-            elif c in affixation_letters:
-                # can be added with alteration
-                if c in (araby.ALEF, araby.WAW, araby.YEH):
-                    chunks.append(['-', araby.WAW, araby.YEH])
-                # alterned 
-                elif c in (araby.ALEF_MAKSURA, ):
-                    chunks.append(['-', araby.YEH])
-                elif c in araby.HAMZAT:
-                    chunks.append(['-', araby.HAMZA])
-                # conditional
-                elif c == araby.DAL:
-                    if previous == araby.ZAIN:
-                        chunks.append(['-', c])
-                    else:
-                        chunks.append([c])
-                elif c == araby.TAH:
-                    if previous == araby.DAD:
-                        chunks.append(['-', c])
-                    else:
-                        chunks.append([c])
-                # added not alterned
-                else:
-                    chunks.append(['-', c])
-            else:
-                # alterned  and normalized 
-                if c in (araby.YEH_HAMZA, ):
-                    chunks.append([araby.YEH, araby.WAW, araby.HAMZA]) 
-                # normalized
-                elif c in araby.HAMZAT:
-                    chunks.append([araby.HAMZA])
-                # alterned 
-                elif c in (araby.ALEF_MAKSURA, ):
-                    chunks.append([araby.YEH])                
-                # ordinary
-                else:
-                    chunks.append([c])
-            previous = c
-        # make matrix and cardinalities
-        matrix = []
-        for ch in chunks:
-            cards.append(len(ch))
-            matrix.append(range(len(ch)))
-        matrix =  list(itertools.product(*matrix))
-        #~ logger.debug("Cardinalities %s",cards)
-        #~ logger.debug("Chunks %s" , arepr(chunks))
-        #~ logger.debug("Matrix %d", len(matrix))
-        #~ for ch in matrix:
-            #~ print(ch)
-
-        chunks_root =  itertools.product(*chunks)
-        templates_list = []
-        # generate all cases
-        for ch in chunks_root:
-            temp = {"word": word, 
-                "template":u''.join(ch), 
-                'root':u''.join([x for  x in ch if x!='-']),
-                }
-            templates_list.append(temp)
-        # filter by root length
-        templates_list = [ d for d in templates_list if len(d['root']) <=4 ]
-        incompleted_templates_list = [ d for d in templates_list if len(d['root']) <3 ]
-        #~ self.debug_algo2(u"Incomplete Templates List ", arepr(incompleted_templates_list))
-
-        ext_list = self.extend_matrix(incompleted_templates_list)
-        
-        #~ logger.debug("Templates %d", len(templates_list))
-        #~ self.debug_algo2(u"Templates List ",arepr(templates_list))
-        #~ self.debug_algo2(u"Extented Templates List ",arepr(ext_list))
-        templates_list.extend(ext_list)
-        return templates_list
-    @staticmethod
-    def extend_matrix(temp_list):
-        """
-        Extend roots according to templates
-        """
-        new_temp_list =[]
-        for item in temp_list:
-            psudoroot = item['root']
-            temp = item['template']
-            reduced = re.sub('^[-]+','',temp)
-            reduced = re.sub('[-]+$','',reduced)
-            extended = []
-            if len(reduced) == 2 and len(psudoroot) == 2:
-                # add Yeh or waw at begin
-                extended.append(araby.WAW + psudoroot)
-                extended.append(araby.YEH + psudoroot)
-                # add Yeh or waw at middle
-                extended.append("".join([psudoroot[0],araby.WAW, psudoroot[1]]))
-                extended.append("".join([psudoroot[0],araby.YEH, psudoroot[1]]))
-                # add Yeh or waw at end
-                extended.append(psudoroot+araby.WAW)
-                extended.append(psudoroot+araby.YEH)
-                # add double letter جد =>جدد
-                extended.append(psudoroot + psudoroot[-1:])
-            for ext_root in extended:
-                new_temp_list.append({'root':ext_root,
-                'template':temp,
-                'word':item["word"],
-                'reduced':reduced,
-                })
-                
-        return new_temp_list        
+  
 def test1(args):
     word = u"لعلهم"
     print(is_root(word))
