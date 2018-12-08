@@ -5,6 +5,7 @@ OUTPUT :=tests/output
 SCRIPT :=scripts
 VERSION=0.4
 DOC="."
+DATE=`echo date`
 #directory to store data genered by extrernal stemmers
 EXTRN_DATA_DIR=samples
 #DataSets
@@ -92,7 +93,7 @@ kb:DATA=${DATA_KB}
 #~ test_all_data: OPTIONS=--all
 test_all_data:OPTIONS=
 test_all_data:test_all
-test_all:OPTIONS=
+test_all:OPTIONS=--all
 test_all: test words test_some gold quranic_corpus qc quran_index qi nafis qwc kb
 
 # test some stemmers
@@ -185,4 +186,8 @@ eval_some_win:
 	python scripts\eval_stemming_result.py -f output\words.csv -o output\words.csv.stats
 	python scripts\eval_stemming_result.py -f output\qwc.csv -o output\qwc.csv.stats
 	python scripts\eval_stemming_result.py -f output\kabi.csv -o output\kabi.csv.stats
+
+zip:
+	tar cvfz releases/rooter.${shell date +'%Y-%m-%d'}.tar.gz  rooter/   scripts/ samples/ output/images/ output/pivots/ README.md  Makefile test_win.bat
+
 
