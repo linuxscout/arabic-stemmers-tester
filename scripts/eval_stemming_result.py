@@ -31,7 +31,8 @@ import pyarabic.araby as araby
 from stopwords.arabicstopwords import is_stop
 from test_stemmers_rooters import calcul_stats
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
-
+import read_config
+STEMMERS_CONFIG = "stemmers.conf"
 
 def grabargs():
     parser = argparse.ArgumentParser(description='Convert Quran Corpus into CSV format.')
@@ -88,38 +89,13 @@ def main():
     # avoid stopwords and invalid words
     df['valid']= df['word'].apply(is_valid_word)
     df = df[df['valid'] == True]
-    if all_stemmers:
-        names = abstractstemmer.factory_stemmer.get_stemmers();
-        names.extend(['khoja','farasa'])
-    else:
-        names =["default",
-        #~ "custom-tag-root",
-        #~ "custom-tag",
-        #~ "isri",
-        #~ "khoja",
-        #~ "farasa",
-        #~ "isri+rooter",
-        #~ "assem",
-        #~ "assem-stemmer",
-        #~ "assem+rooter",
-        #~ "khoja+rooter",
-        #~ "farasa+rooter",
-        #~ "custom-affix",
-        #~ "custom-affix-stp",
-        "custom-root",
-        #~ "custom-root-matrix",
-        #~ "custom-stp",
-        #~ "rooter-only",
-        #~ "multi",
-        #~ "lemmatizer",
-        "rhyzome",
-        #~ "stamp",
-        #~ "extend",
-        #~ "virtual",
-        #~ "virtual+extend",
-        ]
-
-        
+    
+    # prepare stemmers
+    names = read_config.read_stemmers(STEMMERS_CONFIG)
+    if not names:
+        print ("Error on reading config file %s"%STEMMERS_CONFIG)
+        sys.exit()    
+     
 
     dstats = calcul_stats(df, names, stem_flag = True)
     dstats.to_csv(outfile, sep='\t', encoding='utf-8')    

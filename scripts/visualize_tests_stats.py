@@ -37,8 +37,8 @@ def grabargs():
     parser.add_argument("-f", dest="filename", required=True,
     help="input file to convert", metavar="FILE")
     
-    parser.add_argument("-o", dest="outfile", required=True,
-    help="Output file to convert", metavar="OUT_FILE")
+    parser.add_argument("-o", dest="outdir", required=True,
+    help="Output directory to use", metavar="OUT_DIR")
     
     parser.add_argument("--all", type=bool, nargs='?',
                         const=True, 
@@ -96,7 +96,8 @@ output file:
     """)
     args =grabargs()
     filename = args.filename
-    outfile = args.outfile
+    outdir = args.outdir
+    outfile = os.path.join(outdir,"visualize.tex")
     detailed_tables = False
     #~ data_directory = args.data_directory
     all_stemmers = args.all
@@ -117,13 +118,13 @@ output file:
         'total':np.int64,
         }
 
-    names ={"qindex":{'filename':'output/quran_word_v0.5.2.csv.stats', 'desc':'Quran word index'},
+    names ={"qindex":{'filename':'output/stats/quran_word_v0.5.2.csv.stats', 'desc':'Quran word index'},
     
-        "gold":{'filename':'output/gold.csv.stats',  'desc':"Arabic Golden Corpus"},
-        "nafis":{'filename':'output/nafis.unq.stats', 'desc':"NAFIS"},
-        "qcorpus":{'filename': 'output/qc.unq.stats', 'desc':"Quranic Arabic Corpus"},
-        "qwc":{'filename': 'output/qwc.csv.stats', 'desc':"Mushaf Corpus"},
-        "kb":{'filename': 'output/kabi.csv.stats', 'desc':"Kabi Corpus"},
+        "gold":{'filename':'output/stats/gold.csv.stats',  'desc':"Arabic Golden Corpus"},
+        "nafis":{'filename':'output/stats/nafis.unq.stats', 'desc':"NAFIS"},
+        "qcorpus":{'filename': 'output/stats/qc.unq.stats', 'desc':"Quranic Arabic Corpus"},
+        "qwc":{'filename': 'output/stats/qwc.csv.stats', 'desc':"Mushaf Corpus"},
+        "kb":{'filename': 'output/stats/kabi.csv.stats', 'desc':"Kabi Corpus"},
     }
     pd.options.display.float_format = '{:,.2f}'.format
     try:
@@ -233,12 +234,12 @@ output file:
         # generate the plot
         plt.figure()
         df_pivot.plot(rot=15)
-        plt.savefig("output/images/%s.png"%label)  
-        df_pivot.to_csv("output/pivots/%s.csv"%label, sep='\t',encoding='utf8')
+        plt.savefig(os.path.join(outdir, "images/%s.png"%label))  
+        df_pivot.to_csv(os.path.join(outdir,"pivots/%s.csv"%label), sep='\t',encoding='utf8')
 
     tex_footer =u"""\\end{document}"""
     outputfile.write(tex_footer)
-    df_global.to_csv("output/global.stats.csv", sep='\t', encoding='utf8')
+    df_global.to_csv(os.path.join(outdir,"global.stats.csv"), sep='\t', encoding='utf8')
     print("Global Stats are stored in output/global.stats.csv")
     print("Pivots tables Stats are stored in output/pivots/*.csv")
     #~ print df_global

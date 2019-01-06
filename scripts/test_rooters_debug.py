@@ -31,7 +31,8 @@ import numpy as np
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
 import pyarabic.araby as araby
 from stopwords.arabicstopwords import is_stop, stop_stem, stop_root
-
+import read_config
+STEMMERS_CONFIG = "stemmers.conf"
 
 def grabargs():
     parser = argparse.ArgumentParser(description='Root extraction with debug option.')
@@ -213,7 +214,11 @@ def test2():
 
     df = df.replace(np.nan, '', regex=True)
     # prepare stemmers
-    names = abstractstemmer.factory_stemmer.get_stemmers();
+    # prepare stemmers
+    names = read_config.read_stemmers(STEMMERS_CONFIG)
+    if not names:
+        print ("Error on reading config file %s"%STEMMERS_CONFIG)
+        sys.exit()
 
     # add some stemmers to be controled under csv file 
     # show conditions

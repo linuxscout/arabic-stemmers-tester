@@ -30,7 +30,8 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
 import pyarabic.araby as araby
-
+import read_config
+STEMMERS_CONFIG = "stemmers.conf"
 def grabargs():
     parser = argparse.ArgumentParser(description='Convert Quran Corpus into CSV format.')
     # add file name to import and filename to export
@@ -216,6 +217,7 @@ def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=F
 def test_stemmers(dataframe_result, data_path, names, names_to_control):
     """
     """
+    df = dataframe_result
     for name in names:
         if name == "khoja":
             #read khoja stemming
@@ -242,6 +244,18 @@ def test_stemmers(dataframe_result, data_path, names, names_to_control):
 
             except:
                 pass
+        if name == "moataz":
+            #read moataz stemming
+            try:
+                df2 = pd.read_csv(data_path+".moataz", delimiter='\t',
+                      names=['word','root'], 
+                      skiprows=1,
+                      encoding = "utf-8")
+                df2 = df2.replace(np.nan, '', regex=True)
+                df['moataz'] = df2['root']            
+                df['moataz_stem'] = df2['root']            
+            except:
+                pass                
         elif name == "farasa+rooter":
             #read farasa stemming
             df2 = pd.read_csv(data_path+".farasa", delimiter='\t',
@@ -297,54 +311,29 @@ if __name__ == '__main__':
     except:
         print " Can't Open the given File ", filename;
         sys.exit();
-    #~ if not options['limit'] : 
-        #~ limit =  100000000
-    #~ else: limit =0;
-    df = df.replace(np.nan, '', regex=True)
+
     # filter stopwords and non arabic words
     
     # prepare stemmers
-    if all_stemmers:
-        names = abstractstemmer.factory_stemmer.get_stemmers();
-        names.extend(['khoja','farasa'])
-        #~ names = ('default', 'custom',  'isri',"assem", "khoja","farasa", 'custom_stp', 'custom_roots')
-    else:
-        names =["default",
-        #~ "custom-tag-root",
-        #~ "custom-tag",
-        #~ "isri",
-        #~ "khoja",
-        #~ "farasa",
-        #~ "isri+rooter",
-        #~ "assem",
-        #~ "assem-stemmer",
-        #~ "assem+rooter",
-        #~ "khoja+rooter",
-        #~ "farasa+rooter",
-        #~ "custom-affix",
-        #~ "custom-affix-stp",
-        "custom-root",
-        #~ "custom-root-matrix",
-        #~ "custom-stp",
-        #~ "rooter-only",
-        #~ "multi",
-        #~ "lemmatizer",
-        #~ "stamp",
-        #~ "extend",
-        "rhyzome",
-        #~ "virtual",
-        #~ "virtual+extend",
-        ]
+    names = read_config.read_stemmers(STEMMERS_CONFIG,"tashaphyne")
+    if not names:
+        print ("Error on reading config file %s"%STEMMERS_CONFIG)
+        sys.exit()
+
     # add some stemmers to be controled under csv file 
     # show conditions
-    names_to_control =["rhyzome","default","custom-root"]
+    #~ names_to_control =["rhyzome","default","custom-root"]
+    names_to_control =[]
     # add features
     df2 = test_stemmers(df, data_path, names, names_to_control)
 
     # save file on csv
     df2.to_csv(outfile, sep='\t', encoding='utf-8')
     
-    dstats = calcul_stats(df2, names, stem_flag = True)
+    #~ dstats = calcul_stats(df2, names, stem_flag = True)
 
-    dstats.to_csv(outfile+".stats", sep='\t', encoding='utf-8')    
-    print(dstats)
+    #~ dstats.to_csv(outfile+".stats", sep='\t', encoding='utf-8')    
+    #~ print(dstats)
+
+
+

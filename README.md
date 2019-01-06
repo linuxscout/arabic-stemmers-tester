@@ -5,6 +5,9 @@ nafis
 gold
 qi quranic_corpus
 qc quran_index
+qcw quran corpus words
+kb kabi
+
 ### Run Test on data set
 for individual data set
 ```
@@ -14,12 +17,34 @@ make gold
 * results are stored in output/${dataset}.csv
 * statistics are stored in output/${dataset}.csv.stats
 
+Run a stemmer on dataset
+```
+make khoja_nafis
+```
 
-for all datasets
+Run a stemmer on all dataset
+```
+make khoja_all
+make moataz_all
+make assem_all
+make farasa_all
+```
+results are stored on output/processed
+
+
+for Tashaphyne stemmers on all datasets
 
 ```
 make test_all
 ```
+### Merge all files
+
+To merge all result files into joined files 
+```
+make join_all
+```
+The merged files are stored on output/joined
+
 ### Collect tests statstics  after tests
  Whithout runing again the tests, you can collect stats
 *** Individuals***
@@ -32,6 +57,7 @@ change to eval_qi, eval_qc or eval_nafis
 ```
 make eval_all
 ```
+Statistics are stored on output/stats
 
 ## Visualize statitics into Latex and Excel
 
@@ -39,8 +65,11 @@ We can visualize and convert results into Excels and Latex
 ```
 make visualize
 ```
-Global Stats are stored in output/global.stats.csv
-
+Global Stats are stored in output/visuale directory:
+it contains:
+* a tex file
+* charts images
+* pivots tables of evaluation
 
 ### Run Statistics on Datasets
 
