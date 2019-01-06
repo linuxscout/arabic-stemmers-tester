@@ -8,6 +8,8 @@ qc quran_index
 qcw quran corpus words
 kb kabi
 
+## Config file
+a config file in scripts directory to help to choose stemmers to tests.
 ### Run Test on data set
 for individual data set
 ```
