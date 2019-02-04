@@ -192,7 +192,7 @@ show_qc show_gold show_qi show_nafis show_qwc show_kb:
 visualize:
 	echo " generate latex and charts "
 	cd output/visuale/; tar cvfz  archives/arx-${shell date +'%Y-%m-%d.%H:%M'}.tar.gz \
-	 pivots  images visualize.* global.stats.csv
+	pivots  images visualize.* global.stats.csv
 	python scripts/visualize_tests_stats.py -f output/stats/qc.unq.stats -o output/visuale/
 
 
@@ -204,6 +204,8 @@ debug_nafis:
 	python scripts/test_rooters_debug.py -f samples/nafis2.unq -o output/nafis.debug.csv > output/nafis.debug
 debug_gold:
 	python scripts/test_rooters_debug.py -f samples/gold.csv -o output/gold.debug.csv > output/gold.debug
+debug_abdo:
+	python scripts/test_rooters_debug.py -f samples/abdnormal.csv -o output/abdo.debug.csv > output/abdo.debug
 debug:
 	python scripts/test_rooters_debug.py -f samples/words_debug.csv -o output/word_debug.csv > output/words.debug
 show_result:
@@ -240,7 +242,7 @@ eval_some_win:
 	python scripts\eval_stemming_result.py -f output\kabi.csv -o output\kabi.csv.stats
 
 zip:
-	tar cvfz releases/rooter.${shell date +'%Y-%m-%d'}.tar.gz  rooter/   scripts/ samples/ output/images/ output/pivots/ README.md  Makefile test_win.bat
+	tar cvfz releases/rooter.${shell date +'%Y-%m-%d'}.tar.gz  rooter/   scripts/ samples/ output/joined output/processed output/stats output/test_stats output/visuale/images/ output/visuale/pivots/ README.md  Makefile test_win.bat
 
 
 join_all: join_words join_gold  join_qc join_qi join_nafis join_qwc join_kb

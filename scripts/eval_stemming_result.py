@@ -87,8 +87,8 @@ def main():
     import numpy as np
     df = df.replace(np.nan, '', regex=True)
     # avoid stopwords and invalid words
-    df['valid']= df['word'].apply(is_valid_word)
-    df = df[df['valid'] == True]
+    #~ df['valid']= df['word'].apply(is_valid_word)
+    #~ df = df[df['valid'] == True]
     
     # prepare stemmers
     names = read_config.read_stemmers(STEMMERS_CONFIG)

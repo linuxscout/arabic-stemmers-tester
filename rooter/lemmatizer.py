@@ -46,12 +46,12 @@ WAZNS = {
          u'فتع':["add_alef", 
          #~ "add_alef_maksura"
          ],
-         #~ u'فتيل':["add_alef","change_yeh"],
+         u'فتيل':["add_alef","change_yeh"],
         u"نفعل":["add_alef",],
         u"نفع":["add_alef", 
         #~ "add_alef_maksura"
         ],
-        #~ u"نفيل":["add_alef","change_yeh"],
+        u"نفيل":["add_alef","change_yeh"],
          u'ستفعل':["add_alef",],
          u'ستفع':["add_alef", 
          #~ "add_alef_maksura"
@@ -138,7 +138,8 @@ class lemmaDict:
         """ select a stem to return """
         stems = [d['stem'] for d in affixa_list]
         stems = list(set(stems))
-
+        #~ ajust = False; # add ajust stems
+        ajust = True; # add ajust stems
         # choose a stem
         self.log(affixa_list, "affix lists filtred")
         self.log(stems, "stems list")        
@@ -147,8 +148,9 @@ class lemmaDict:
         # return the shortest
         stem = min(stems, key=len)
         chosen_affixa = [d for d in affixa_list if d['stem'] == stem]
-        for aff in chosen_affixa:
-            aff["stem"] = self.ajust_lemma(aff)
+        if ajust:
+            for aff in chosen_affixa:
+                aff["stem"] = self.ajust_lemma(aff)
         #~ print(arepr(chosen_affixa))
         #choose the first one,
         # todo choose best one
@@ -159,15 +161,15 @@ class lemmaDict:
         
         # add Alef for some verbs
         prefix = affixa['prefix']
+        suffix = affixa['suffix']
         #~ suffix = affixa['suffix']
         stem = affixa['stem']
 
         # get wazn like
         wazn = self.get_wazn(stem)
         if wazn:
-                
             actions = WAZNS[wazn]
-            stem = self.do_actions(stem, actions)
+            stem = self.do_actions(stem, actions, prefix, suffix)
             #~ print(actions)
 
         #~ # if prefix ends with
@@ -182,14 +184,16 @@ class lemmaDict:
         else:
             print(msg)
             print(arepr(data))
-    def do_actions(self, stem, actions):
+    def do_actions(self, stem, actions, prefix, suffix):
         """ do action by name """
         if  "add_alef" in actions:
-            stem = araby.ALEF + stem
+            if prefix[-1:] in (araby.YEH, araby.NOON, araby.TEH):
+                stem = araby.ALEF + stem
         if "add_alef_maksura" in actions:
             stem += araby.ALEF_MAKSURA
         if "change_yeh" in actions:
-            stem = araby.ALEF_MAKSURA
+            # ستطيع ="ستطاع
+            stem = stem[:-2]+ araby.ALEF+stem[-1:]
 
         return stem
 

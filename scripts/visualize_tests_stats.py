@@ -165,23 +165,23 @@ output file:
                 'label' : "%s-micro"%key,
                 'method':'root', 'average':'micro',
                 },
-                {
-                'caption'   : "Macro classification on %s dataset "%names[key]["desc"],
-                'label' : "%s-macro"%key,
-                'method':'root', 'average':'macro',
-                },
+                #~ {
+                #~ 'caption'   : "Macro classification on %s dataset "%names[key]["desc"],
+                #~ 'label' : "%s-macro"%key,
+                #~ 'method':'root', 'average':'macro',
+                #~ },
                 {
                 'caption'   : "Stem Extraction evaluation  Micro classification on %s dataset "%names[key]["desc"],
                 'label' : "%s-stmmicro"%key,
 
                 'method':'stem', 'average':'micro',            
                 },
-                {
-                'caption'   : "Stem Extraction evaluation  Macro classification on %s dataset "%names[key]["desc"],
-                'label' : "%s-stmmacro"%key,
+                #~ {
+                #~ 'caption'   : "Stem Extraction evaluation  Macro classification on %s dataset "%names[key]["desc"],
+                #~ 'label' : "%s-stmmacro"%key,
 
-                'method':'stem', 'average':'macro',
-                },
+                #~ 'method':'stem', 'average':'macro',
+                #~ },
                 ]
             for mytab in mytables:
                 outputfile.write("%% test of %s\n"%key)    
@@ -200,12 +200,14 @@ output file:
     'field':'Accuracy', 'caption':"Root Extraction evaluation,Linguistic accuracy "},
     {'method':'root', 'average':'micro',
     'field':'F1 score', 'caption':"Root Extraction evaluation, Micro classification "},
-    {'method':'root', 'average':'macro',
-    'field':'F1 score','caption':"Root Extraction evaluation, Macro classification "},
+    #~ {'method':'root', 'average':'macro',
+    #~ 'field':'F1 score','caption':"Root Extraction evaluation, Macro classification "},
     {'method':'stem', 'average':'micro',
-    'field':'F1 score', 'caption':"Stem Extraction evaluation, Macro classification "},
-    {'method':'stem', 'average':'macro',
     'field':'F1 score', 'caption':"Stem Extraction evaluation, Micro classification "},
+    {'method':'stem', 'average':'micro',
+    'field':'Accuracy', 'caption':"Stem Extraction evaluation, Micro classification "},
+    #~ {'method':'stem', 'average':'macro',
+    #~ 'field':'F1 score', 'caption':"Stem Extraction evaluation, Micro classification "},
     ]
     for mych in mycharts:
         field = mych.get('field','')
@@ -236,6 +238,18 @@ output file:
         df_pivot.plot(rot=15)
         plt.savefig(os.path.join(outdir, "images/%s.png"%label))  
         df_pivot.to_csv(os.path.join(outdir,"pivots/%s.csv"%label), sep='\t',encoding='utf8')
+
+    # pivot global
+    method = "root"
+    average = "micro"
+    dfg = df_global[(df_global['method']==method) & (df_global['average']==average )]
+    df_pivot = dfg.pivot(index='name', columns='dataset',)
+    
+    # generate data to latex
+    tex = visualize_latex_string(df_pivot, caption="Global pivot", label="globle pivot")
+    outputfile.write(tex)
+
+    df_pivot.to_csv(os.path.join(outdir,"pivots/global.csv"), sep='\t',encoding='utf8')
 
     tex_footer =u"""\\end{document}"""
     outputfile.write(tex_footer)

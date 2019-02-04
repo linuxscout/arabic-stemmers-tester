@@ -32,8 +32,8 @@ from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_s
 import pyarabic.araby as araby
 from stopwords.arabicstopwords import is_stop, stop_stem, stop_root
 import read_config
-STEMMERS_CONFIG = "stemmers.conf"
-
+STEMMERS_CONFIG = "stemmers_debug.conf"
+import test_stemmers_rooters
 def grabargs():
     parser = argparse.ArgumentParser(description='Root extraction with debug option.')
     # add file name to import and filename to export
@@ -49,6 +49,7 @@ def grabargs():
 def test_stemmers(dataframe_result, names):
     """
     """
+    df = dataframe_result
     for name in names:
         asl = abstractstemmer.factory_stemmer.create_stemmer(name);
         # use debug rooter algorithm
@@ -219,11 +220,26 @@ def test2():
     if not names:
         print ("Error on reading config file %s"%STEMMERS_CONFIG)
         sys.exit()
-
+    rooters = False
     # add some stemmers to be controled under csv file 
     # show conditions
-    test_rooter3(df)
-
+    if rooters:
+        test_rooter3(df)
+    
+    else:
+        df2 = test_stemmers(df, names)
+        df2.to_csv(outfile, sep="\t", encoding='utf8')
+        # to control on excel
+        df3 = df2[["word", "lemma", "multi_stem", "lemmatizer_stem"]]
+        df3.loc[:, "normalized"] = df3["lemma"].apply(test_stemmers_rooters.normalize_stem)
+        df3.loc[:, 'compare'] = df3.apply(lambda row: test_stemmers_rooters.equal_stem(row['lemmatizer_stem'], row["lemma"]), axis=1)
+        df3.loc[:, 'compare_norm'] = df3.apply(lambda row: test_stemmers_rooters.equal_stem(row['lemmatizer_stem'], row["normalized"]), axis=1)
+        
+        df3.to_csv(outfile+".ctrl.csv", sep="\t", encoding='utf8')
+        
+        dstats = test_stemmers_rooters.calcul_stats(df2, names, stem_flag = True)
+        dstats.to_csv(outfile+".stats", sep='\t', encoding='utf-8')    
+        print(dstats)
 if __name__ == '__main__':
     
     test2()

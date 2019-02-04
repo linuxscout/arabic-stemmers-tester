@@ -31,6 +31,10 @@ import snowballstemmer.arabic_stemmer
 import snowballstemmer_modified.arabic_stemmer 
 import naftawayh.wordtag
 from stopwords.arabicstopwords import is_stop, stop_stem, stop_root
+
+# get constants
+import affix_const
+
 from pyarabic.arabrepr import arepr
 import lemmatizer
 #~ CUSTOM_PREFIX_LIST = [u'كال', u'أفبال', u'أفك', u'فك', u'أولل', u'', u'أف', u'ول', u'أوال', u'ف', u'و', u'أو', u'ولل', u'فب', u'أول', u'ألل', u'لل', u'ب', u'وكال', u'أوب', u'بال', u'أكال', u'ال', u'أب', u'وب', u'أوبال', u'أ', u'وبال', u'أك', u'فكال', u'أوك', u'فلل', u'وك', u'ك', u'أل', u'فال', u'وال', u'أوكال', u'أفلل', u'أفل', u'فل', u'أال', u'أفكال', u'ل', u'أبال', u'أفال', u'أفب', u'فبال']
@@ -217,6 +221,7 @@ class customStemmer_lemmatizer(abstractStemmer):
         self.set_suffix_list(CUSTOM_SUFFIX_LIST)
         self.config["affix"] = "custom"
         self.debug = False
+        self.affix_list = affix_const.AFFIX_LIST
         self.lemmatizer = lemmatizer.lemmaDict()
         
     def getstem(self,word):
@@ -244,7 +249,7 @@ class customStemmer_lemmatizer(abstractStemmer):
         """ get a stem from word"""
         self.light_stem(word)
         return self.get_root()
-    def verify_affix(self, affix_tuple):
+    def verify_affix2(self, affix_tuple):
         #مراجعة مبسطة
         # أل التعريف مع ضمير متصل
         prefix = affix_tuple.get('prefix', '')
@@ -259,7 +264,24 @@ class customStemmer_lemmatizer(abstractStemmer):
             (u'و' in suffix or u'ان' in suffix)
             ):
                 return False
-        return True        
+        return True
+        
+    def verify_affix(self, affix_tuple):
+        """
+        Verify possible affixes in the resulted segments
+        according to the given affixes list.
+        @param word: the input word.
+        @type word: unicode.
+        @param list_seg: list of word segments indexes (numbers).
+        @type list_seg: list of pairs.
+        @return: list of acceped segments.
+        @rtype: list of pairs.
+        """
+        prefix = affix_tuple.get('prefix', '')
+        suffix = affix_tuple.get('suffix', '')
+        affix = prefix+'-'+suffix
+        return affix in self.affix_list
+
 class customStemmer_lemmatizer_tag(abstractStemmer):
     """ I will make more options for stemmer """
     def __init__(self,):
