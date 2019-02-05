@@ -98,22 +98,60 @@ def is_valid_stem(stem):
             return False
     return True
     
-def normalize_stem(word):
-    return re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+def normalize_stem(word, normalize_full=False):
+    if normalize_full:
+        word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
+        word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)
+        word = word.replace(araby.YEH_HAMZA,araby.HAMZA)
+        word = word.replace(araby.WAW_HAMZA,araby.HAMZA)
+        #~ word = word.replace(araby.YEH_HAMZA,araby.YEH)
+        #~ word = word.replace(araby.WAW_HAMZA,araby.WAW)
+        word = word.replace(araby.ALEF_MAKSURA, araby.YEH)
+        # to choose Teh marbuta as Heh or TEH or remove it
+        word = word.replace(araby.TEH_MARBUTA, "")
+        #~ word = word.replace(araby.TEH_MARBUTA, araby.TEH)
+
+    word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+    return word
     
-def equal_stem(stem1, stem2):
+
+def equal_stem(stem1, stem2, normalize_full=False):
     """ compare to stems"""
     # test if normalized stems are equal
     # Todo
     if stem1 == stem2:
         return True
     elif len(stem1) == len(stem2):
-        return normalize_stem(stem1) == normalize_stem(stem2)
+        return normalize_stem(stem1, normalize_full) == normalize_stem(stem2, normalize_full)
     else:
         #~ if ";" in stem2: # multipe choices
         stems = stem2.split(';')
-        return stem1 in stems
+        stems = [normalize_stem(s, normalize_full) for s in stems]
+        return normalize_stem(stem1, normalize_full) in stems
     return False
+    
+
+    
+def my_metric_stem_test(stem_origin, stem_calculated):
+    """ exists stem """
+    # how to examin metrics
+    # TP : calculted stem  is in stem_orginal
+    # TN : calculted stem  is null and   stem_orginal is null
+    # FP : calculted stem  is not null and   stem_orginal is null
+    # FN : calculted stem  is incorrect and   stem_orginal is not null
+    if not is_valid_stem(stem_origin)  and not is_valid_stem(stem_calculated) :
+            return "TN"
+    elif not is_valid_stem(stem_origin)  and is_valid_stem(stem_calculated) :
+            return "FP"
+    elif is_valid_stem(stem_origin) and not is_valid_stem(stem_calculated):
+        return "FN"
+    elif is_valid_stem(stem_origin) and is_valid_stem(stem_calculated):    
+        if equal_stem(stem_calculated, stem_origin, normalize_full=True ):
+            return "TP"
+        else:
+            return "FN"
+    else:
+        "NON"    
             
 def my_metric_test(root_origin, root_calculated):
     """ exists root """
@@ -137,26 +175,7 @@ def my_metric_test(root_origin, root_calculated):
     else:
         "NON"
     
-def my_metric_stem_test(stem_origin, stem_calculated):
-    """ exists stem """
-    # how to examin metrics
-    # TP : calculted stem  is in stem_orginal
-    # TN : calculted stem  is null and   stem_orginal is null
-    # FP : calculted stem  is not null and   stem_orginal is null
-    # FN : calculted stem  is incorrect and   stem_orginal is not null
-    if not is_valid_stem(stem_origin)  and not is_valid_stem(stem_calculated) :
-            return "TN"
-    elif not is_valid_stem(stem_origin)  and is_valid_stem(stem_calculated) :
-            return "FP"
-    elif is_valid_stem(stem_origin) and not is_valid_stem(stem_calculated):
-        return "FN"
-    elif is_valid_stem(stem_origin) and is_valid_stem(stem_calculated):    
-        if equal_stem(stem_calculated, stem_origin):
-            return "TP"
-        else:
-            return "FN"
-    else:
-        "NON"
+
     
 def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=False, ):
     """
@@ -180,12 +199,6 @@ def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=F
         TN = df[df.metric == "TN"][name].count()
         FP = df[df.metric == "FP"][name].count()
         FN = df[df.metric == "FN"][name].count()
-        # stem_metricx
-        df['metric_stem'] = df.apply(lambda row: my_metric_stem_test(row['lemma'], row[name_stem]), axis=1)
-        TP_stem = df[df.metric_stem == "TP"][name_stem].count()
-        TN_stem = df[df.metric_stem == "TN"][name_stem].count()
-        FP_stem = df[df.metric_stem == "FP"][name_stem].count()
-        FN_stem = df[df.metric_stem == "FN"][name_stem].count()        
         stats_list.append({
         "name":name,
         "method":"root",
@@ -196,30 +209,19 @@ def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=F
         "FN":FN,
         "TP":TP,
         "FP":FP,        
-        #~ "Accuracy": cpt *100.0 / total,
-        #~ 'Accuracy': accuracy_score(df["root"],df[name])*100,
-        #~ 'F1 score': f1_score(df["root"],df[name], average='micro')*100,
-        #~ 'Recall':recall_score(df["root"],df[name], average='micro')*100,
-        #~ 'Precision': precision_score(df["root"],df[name], average='micro')*100,
         'Accuracy': (TP+TN)*100.0/(TP+TN+FP+FN),
         'F1 score': 2*TP*100.0/(2*TP+FP+FN),
         'Recall': TP*100.0/(TP+FN),
         'Precision': TP*100.0/(TP+FP),
         
         })
-        #~ stats_list.append({        
-        #~ "name":name,
-        #~ "method":"root",
-        #~ "average":'macro',
-        #~ "count":cpt,
-        #~ "total":total,
-        #~ 'Accuracy': accuracy_score(df["root"],df[name])*100,
-        #~ 'F1 score': f1_score(df["root"],df[name], average='macro') *100,
-        #~ 'Recall':recall_score(df["root"],df[name], average='macro')*100,
-        #~ 'Precision': precision_score(df["root"],df[name], average='macro')*100,
-        #~ })
-        # stem
-        #~ "linguistics accuracy": cpt *100.0 / total,
+        # stem_metrics
+        df['metric_stem'] = df.apply(lambda row: my_metric_stem_test(row['lemma'], row[name_stem]), axis=1)
+        TP_stem = df[df.metric_stem == "TP"][name_stem].count()
+        TN_stem = df[df.metric_stem == "TN"][name_stem].count()
+        FP_stem = df[df.metric_stem == "FP"][name_stem].count()
+        FN_stem = df[df.metric_stem == "FN"][name_stem].count()        
+
         stats_list.append({        
         "name":name,
         "method":"stem",
@@ -230,61 +232,12 @@ def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=F
         "FN":FN_stem,
         "TP":TP_stem,
         "FP":FP_stem,         
-        #~ 'Accuracy': accuracy_score(df["lemma"],df[name+"_stem"])*100,
-        #~ 'F1 score': f1_score(df["lemma"],df[name+"_stem"], average='micro')*100,
-        #~ 'Recall':recall_score(df["lemma"],df[name+"_stem"], average='micro')*100,
-        #~ 'Precision': precision_score(df["lemma"],df[name+"_stem"], average='micro')*100,
         'Accuracy': (TP_stem+TN_stem)*100.0/(TP_stem+TN_stem+FP_stem+FN_stem),
         'F1 score': 2*TP_stem*100.0/(2*TP_stem+FP_stem+FN_stem),
         'Recall': TP_stem*100.0/(TP_stem+FN_stem),
         'Precision': TP_stem*100.0/(TP_stem+FP_stem),        
         })
-        #~ stats_list.append({        
-        #~ "name":name,
-        #~ "method":"stem",
-        #~ "average":'micro1',
-        #~ "count":cpt_stem,
-        #~ "total":total,
-        #~ 'Accuracy': accuracy_score(df["lemma"],df[name+"_stem"])*100,
-        #~ 'F1 score': f1_score(df["lemma"],df[name+"_stem"], average='micro')*100,
-        #~ 'Recall':recall_score(df["lemma"],df[name+"_stem"], average='micro')*100,
-        #~ 'Precision': precision_score(df["lemma"],df[name+"_stem"], average='micro')*100,
-        #~ 'Accuracy': (TP_stem+TN_stem)*100.0/(TP_stem+TN_stem+FP_stem+FN_stem),
-        #~ 'F1 score': 2*TP_stem*100.0/(2*TP_stem+FP_stem+FN_stem),
-        #~ 'Recall': TP_stem*100.0/(TP_stem+FN_stem),
-        #~ 'Precision': TP_stem*100.0/(TP_stem+FP_stem),        
-        #~ })
-        #~ stats_list.append({        
-        #~ "name":name,
-        #~ "method":"stem",
-        #~ "average":'macro',
-        #~ "count":cpt_stem,
-        #~ "total":total,
-    
-        #~ 'Accuracy': accuracy_score(df["lemma"],df[name+"_stem"])*100,
-        #~ 'F1 score': f1_score(df["lemma"],df[name+"_stem"], average='macro')*100,
-        #~ 'Recall':recall_score(df["lemma"],df[name+"_stem"], average='macro')*100,
-        #~ 'Precision': precision_score(df["lemma"],df[name+"_stem"], average='macro')*100,
-        #~ })
-
-        
-
-    #~ if stem_flag:
-        #~ print('********* STEMS ****************')
-        #~ for name in names:
-            
-            #~ cpt = df[df.lemma == df[name+"_stem"]][name].count()
-            #~ print "%s Stemmer [%d / %d] %.2f%%"%(name,cpt,total,  cpt *100.0 / total)
-    #~ if lemma_flag:
-        #~ print('********* LEMMA ****************')
-        #~ for name in names:
-            #~ cpt = df[df.lemma == df[name+"_stem"]][name].count()
-            #~ print "%s Stemmer [%d / %d] %.2f%%"%(name,cpt,total,  cpt *100.0 / total)
-
-    #~ dstats = pd.DataFrame.from_dict(stats_list, orient='index')
     dstats = pd.DataFrame(stats_list)
-    #~ decimals = pd.Series([2, 2, 2,2,2], index=['average', 'Accuracy', 'F1 score','Recall', 'Precision' ])        
-    #~ dstats.round(decimals)
     
     return dstats
     

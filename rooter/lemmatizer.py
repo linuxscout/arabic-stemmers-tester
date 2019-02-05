@@ -42,9 +42,15 @@ import re
 # the stamp pattern is used to create the word stamp
    
 WAZNS = {
+         u"إفاع":["add_teh_marbuta",],
+         u"إفعال":["normalize_hamza",],
+         u'فتعال':["add_alef_noun", "normalize_hamza"],
+         u'ستفعال':["add_alef_noun", "normalize_hamza"],
+         u'نفعال':["add_alef_noun", "normalize_hamza"],
+         #~ u'فعال':["add_alef_hamza_noun", "normalize_hamza"],
+
          u'فتعل':["add_alef",],
-         u'فتع':["add_alef", 
-         #~ "add_alef_maksura"
+         u'فتع':["add_alef",  #"add_alef_maksura"
          ],
          u'فتيل':["add_alef","change_yeh"],
         u"نفعل":["add_alef",],
@@ -52,11 +58,14 @@ WAZNS = {
         #~ "add_alef_maksura"
         ],
         u"نفيل":["add_alef","change_yeh"],
-         u'ستفعل':["add_alef",],
+         u'ستفيل':["add_alef","change_yeh"],
+         u'ستفعل':["add_alef", "change_yeh"],
          u'ستفع':["add_alef", 
          #~ "add_alef_maksura"
          ],
-         u'ستفيل':["add_alef","change_yeh"],
+         #~ u"أفعال":["normalize_hamza",],
+         
+
          }
 
 class lemmaDict:
@@ -172,10 +181,8 @@ class lemmaDict:
             stem = self.do_actions(stem, actions, prefix, suffix)
             #~ print(actions)
 
-        #~ # if prefix ends with
-        #~ if prefix[-1:] in (araby.YEH, araby.NOON, araby.TEH):
-            #~ if stem.startswith(u"ست"):
-                #~ stem = araby.ALEF + stem
+        stem = self.ajust_supplements(stem, prefix, suffix)
+        
         return stem
     def log(self, data, msg=""):
         """ display internal data"""
@@ -184,16 +191,73 @@ class lemmaDict:
         else:
             print(msg)
             print(arepr(data))
+
     def do_actions(self, stem, actions, prefix, suffix):
         """ do action by name """
         if  "add_alef" in actions:
-            if prefix[-1:] in (araby.YEH, araby.NOON, araby.TEH):
+            if prefix[-1:] in (araby.YEH, araby.NOON, araby.TEH, araby.ALEF_HAMZA_ABOVE, araby.ALEF):
                 stem = araby.ALEF + stem
+        if  "add_alef_noun" in actions:
+            if prefix[-1:] in (araby.ALEF,):
+                stem = araby.ALEF + stem
+        #~ if  "add_alef_hamza_noun" in actions:
+            #~ if prefix[-1:] in (araby.ALEF_HAMZA_ABOVE,):
+                #~ stem = araby.ALEF + stem
         if "add_alef_maksura" in actions:
             stem += araby.ALEF_MAKSURA
         if "change_yeh" in actions:
             # ستطيع ="ستطاع
-            stem = stem[:-2]+ araby.ALEF+stem[-1:]
-
+            # if before last letter
+            beforelast = stem[-2:-1]
+            if beforelast ==araby.YEH:
+                stem = stem[:-2]+ araby.ALEF+stem[-1:]
+        if "add_teh_marbuta" in actions:
+            #~ if suffix.startswith(araby.TEH_MARBUTA) or suffix.startswith(araby.TEH):
+                #~ stem += araby.TEH_MARBUTA
+            stem += araby.TEH_MARBUTA
+        if "normalize_hamza" in actions:
+            last = stem[-1:]
+            if last in (araby.YEH_HAMZA, araby.WAW_HAMZA):
+                stem = stem[:-1]+ araby.HAMZA
+                
         return stem
+
+    def ajust_supplements(self, stem, prefix, suffix):
+        """ do action by name """
+        # supplements action
+        #~ # قضائ، فضائ، كهربائي
+        if stem.endswith(araby.ALEF+ araby.YEH_HAMZA) or stem.endswith(araby.ALEF+ araby.WAW_HAMZA):
+            stem = stem[:-1] + araby.HAMZA
+        #~ # ة أو ات
+        #~ if suffix.startswith(araby.TEH_MARBUTA) or suffix.startswith(araby.ALEF +araby.TEH):
+        #~ if suffix.startswith(araby.TEH_MARBUTA) :#or suffix.startswith(araby.ALEF +araby.TEH):
+            #~ stem += araby.TEH_MARBUTA
+        return stem
+    def is_valid_verb_stem(self,stem, prefix, suffix):
+        """validate verb form """
+        # control on length
+        if len(stem) > 6:
+            return False
+        else:
+            #الفعل السداسي على وزن استفعل
+            if len(stem)== 6 and not stem.startswith(araby.ALEF):
+                return False
+            #الفعل الخماسي
+            # انفعل، افتعل، تفاعل، تفعلل
+            # ستفعل من استفعل
+            elif len(stem)== 5 and not (stem.startswith(araby.ALEF) or 
+                 stem.startswith(araby.TEH) or
+                  #~ stem.startswith(araby.SEEN)):
+                  stem.startswith(araby.SEEN+araby.TEH)):
+                return False
+        invalid_letters = (araby.TEH_MARBUTA, araby.ALEF_HAMZA_BELOW)
+        for c in invalid_letters:
+            if c in stem:
+                return False
+        if stem.startswith(araby.ALEF) and  prefix[-1:] in (araby.YEH, araby.NOON, araby.TEH, araby.ALEF_HAMZA_ABOVE, araby.ALEF):
+            return False
+        return True
+    def is_valid_noun_stem(self,stem, prefix, suffix):
+        """validate noun form """
+        return True
 

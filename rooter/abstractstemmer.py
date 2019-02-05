@@ -222,6 +222,8 @@ class customStemmer_lemmatizer(abstractStemmer):
         self.config["affix"] = "custom"
         self.debug = False
         self.affix_list = affix_const.AFFIX_LIST
+        self.verb_affix_list = affix_const.VERB_AFFIX_LIST
+        self.noun_affix_list = affix_const.NOUN_AFFIX_LIST
         self.lemmatizer = lemmatizer.lemmaDict()
         
     def getstem(self,word):
@@ -279,8 +281,18 @@ class customStemmer_lemmatizer(abstractStemmer):
         """
         prefix = affix_tuple.get('prefix', '')
         suffix = affix_tuple.get('suffix', '')
+        stem   = affix_tuple.get('stem','') 
         affix = prefix+'-'+suffix
-        return affix in self.affix_list
+        if affix in self.affix_list:
+            #~ return True
+            if (affix in self.verb_affix_list and self.lemmatizer.is_valid_verb_stem(stem, prefix, suffix)):
+                return True
+            elif (affix in self.noun_affix_list and self.lemmatizer.is_valid_noun_stem(stem, prefix, suffix)):
+                return True
+            else:
+                return False
+        return False
+        
 
 class customStemmer_lemmatizer_tag(abstractStemmer):
     """ I will make more options for stemmer """

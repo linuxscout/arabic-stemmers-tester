@@ -233,7 +233,7 @@ def test2():
         df3 = df2[["word", "lemma", "multi_stem", "lemmatizer_stem"]]
         df3.loc[:, "normalized"] = df3["lemma"].apply(test_stemmers_rooters.normalize_stem)
         df3.loc[:, 'compare'] = df3.apply(lambda row: test_stemmers_rooters.equal_stem(row['lemmatizer_stem'], row["lemma"]), axis=1)
-        df3.loc[:, 'compare_norm'] = df3.apply(lambda row: test_stemmers_rooters.equal_stem(row['lemmatizer_stem'], row["normalized"]), axis=1)
+        df3.loc[:, 'compare_norm'] = df3.apply(lambda row: test_stemmers_rooters.equal_stem(row['lemmatizer_stem'], row["normalized"], normalize_full=True), axis=1)
         
         df3.to_csv(outfile+".ctrl.csv", sep="\t", encoding='utf8')
         
