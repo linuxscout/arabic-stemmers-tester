@@ -1,0 +1,36 @@
+#-------------------------------------------------------------------------------
+# This file is part of Arabic Morphological Patterns/Templates
+# 
+# Copyright (c) 2011 Mohammed Attia
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#-------------------------------------------------------------------------------
+
+Arabic Morphological Patterns/Templates by Mohammed Attia
+
+This is the Arabic Morphological Patterns/Templates manually created by Mohammed Attia.
+It contain 491 morphological patterns.
+In the derivational morphology Arabic words are formed through the amalgamation of two tiers, 
+namely, root and template. A root is a sequence of three consonants, and the template is 
+a pattern of vowels, or vowels with consonants, with slots into which the consonants of 
+the root are inserted. This process of insertion is called interdigitation
+
+This package contains 4 files
+1. README
+2. COPYING
+3. AUTHORS
+4. Arabic-patterns-tabbed.txt
+   This file contains all the patterns that I collected
+
+The patterns file is tab delimited with feature-value attributes.
