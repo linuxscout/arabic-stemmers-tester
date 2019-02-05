@@ -67,180 +67,7 @@ def get_stem_farasa(word):
     return word    
 
   
-def my_test(root_origin, root_calculated):
-    """ exists root """
-    roots = root_origin.split(';')
-    return root_calculated in roots
-def is_valid_root(x):
-    """ is a valid root"""
-    # if word is null
-    if not x:
-        return False
-    # if the word contains latin chars
-    if not araby.is_arabicword(x):
-        return False
-    # if root is more than 4 letters or less than three letters
-    return (len(x) >= 3 and len(x)<=4 and araby.ALEF not in x)    
-def is_valid_stem(stem):
-    """ is a valid stem"""
-    # if word is null
-    if not stem:
-        return False
-    # test multiple stem
-    #if all parts are null return False
-    if ";" in stem:
-        parts = [x for x in stem.split(';') if x]
-        if not parts:
-            return False
-    else:
-        # if the word contains latin chars
-        if not araby.is_arabicword(stem):
-            return False
-    return True
-    
-def normalize_stem(word, normalize_full=False):
-    if normalize_full:
-        word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
-        word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)
-        word = word.replace(araby.YEH_HAMZA,araby.HAMZA)
-        word = word.replace(araby.WAW_HAMZA,araby.HAMZA)
-        #~ word = word.replace(araby.YEH_HAMZA,araby.YEH)
-        #~ word = word.replace(araby.WAW_HAMZA,araby.WAW)
-        word = word.replace(araby.ALEF_MAKSURA, araby.YEH)
-        # to choose Teh marbuta as Heh or TEH or remove it
-        word = word.replace(araby.TEH_MARBUTA, "")
-        #~ word = word.replace(araby.TEH_MARBUTA, araby.TEH)
 
-    word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
-    return word
-    
-
-def equal_stem(stem1, stem2, normalize_full=False):
-    """ compare to stems"""
-    # test if normalized stems are equal
-    # Todo
-    if stem1 == stem2:
-        return True
-    elif len(stem1) == len(stem2):
-        return normalize_stem(stem1, normalize_full) == normalize_stem(stem2, normalize_full)
-    else:
-        #~ if ";" in stem2: # multipe choices
-        stems = stem2.split(';')
-        stems = [normalize_stem(s, normalize_full) for s in stems]
-        return normalize_stem(stem1, normalize_full) in stems
-    return False
-    
-
-    
-def my_metric_stem_test(stem_origin, stem_calculated):
-    """ exists stem """
-    # how to examin metrics
-    # TP : calculted stem  is in stem_orginal
-    # TN : calculted stem  is null and   stem_orginal is null
-    # FP : calculted stem  is not null and   stem_orginal is null
-    # FN : calculted stem  is incorrect and   stem_orginal is not null
-    if not is_valid_stem(stem_origin)  and not is_valid_stem(stem_calculated) :
-            return "TN"
-    elif not is_valid_stem(stem_origin)  and is_valid_stem(stem_calculated) :
-            return "FP"
-    elif is_valid_stem(stem_origin) and not is_valid_stem(stem_calculated):
-        return "FN"
-    elif is_valid_stem(stem_origin) and is_valid_stem(stem_calculated):    
-        if equal_stem(stem_calculated, stem_origin, normalize_full=True ):
-            return "TP"
-        else:
-            return "FN"
-    else:
-        "NON"    
-            
-def my_metric_test(root_origin, root_calculated):
-    """ exists root """
-    # how to examin metrics
-    # TP : calculted root  is in root_orginal
-    # TN : calculted root  is null and   root_orginal is null
-    # FP : calculted root  is not null and   root_orginal is null
-    # FN : calculted root  is incorrect and   root_orginal is not null
-    if not is_valid_root(root_origin)  and not is_valid_root(root_calculated) :
-            return "TN"
-    elif not is_valid_root(root_origin)  and is_valid_root(root_calculated) :
-            return "FP"
-    elif is_valid_root(root_origin) and not is_valid_root(root_calculated):
-        return "FN"
-    elif is_valid_root(root_origin) and is_valid_root(root_calculated):    
-        roots = root_origin.split(';')
-        if root_calculated in roots:
-            return "TP"
-        else:
-            return "FN"
-    else:
-        "NON"
-    
-
-    
-def calcul_stats(dataframe, names, root_flag=True, stem_flag=False, lemma_flag=False, ):
-    """
-    Calculer 
-    """
-    df = dataframe
-    #~ # display= data stats
-    #~ print('********* ROOT ****************')
-    total = df.shape[0] # row number
-    #~ stats_list={}
-    stats_list = []
-    for name in names:
-        name_stem = name+"_stem"
-        cpt_stem = df[df.lemma == df[name+"_stem"]][name].count()
-        #~ cpt = df[df.root == df[name]][name].count()
-        df['Value'] = df.apply(lambda row: my_test(row['root'], row[name]), axis=1)
-        df['metric'] = df.apply(lambda row: my_metric_test(row['root'], row[name]), axis=1)
-        #~ cpt = df[df.root  in df[name].split(';')][name].count()
-        cpt = df[df.Value == True][name].count()
-        TP = df[df.metric == "TP"][name].count()
-        TN = df[df.metric == "TN"][name].count()
-        FP = df[df.metric == "FP"][name].count()
-        FN = df[df.metric == "FN"][name].count()
-        stats_list.append({
-        "name":name,
-        "method":"root",
-        "average":'micro',
-        "count":cpt,
-        "total":total,
-        "TN":TN,
-        "FN":FN,
-        "TP":TP,
-        "FP":FP,        
-        'Accuracy': (TP+TN)*100.0/(TP+TN+FP+FN),
-        'F1 score': 2*TP*100.0/(2*TP+FP+FN),
-        'Recall': TP*100.0/(TP+FN),
-        'Precision': TP*100.0/(TP+FP),
-        
-        })
-        # stem_metrics
-        df['metric_stem'] = df.apply(lambda row: my_metric_stem_test(row['lemma'], row[name_stem]), axis=1)
-        TP_stem = df[df.metric_stem == "TP"][name_stem].count()
-        TN_stem = df[df.metric_stem == "TN"][name_stem].count()
-        FP_stem = df[df.metric_stem == "FP"][name_stem].count()
-        FN_stem = df[df.metric_stem == "FN"][name_stem].count()        
-
-        stats_list.append({        
-        "name":name,
-        "method":"stem",
-        "average":'micro',
-        "count":cpt_stem,
-        "total":total,
-        "TN":TN_stem,
-        "FN":FN_stem,
-        "TP":TP_stem,
-        "FP":FP_stem,         
-        'Accuracy': (TP_stem+TN_stem)*100.0/(TP_stem+TN_stem+FP_stem+FN_stem),
-        'F1 score': 2*TP_stem*100.0/(2*TP_stem+FP_stem+FN_stem),
-        'Recall': TP_stem*100.0/(TP_stem+FN_stem),
-        'Precision': TP_stem*100.0/(TP_stem+FP_stem),        
-        })
-    dstats = pd.DataFrame(stats_list)
-    
-    return dstats
-    
     
 def test_stemmers(dataframe_result, data_path, names, names_to_control):
     """
@@ -317,6 +144,7 @@ def test_stemmers(dataframe_result, data_path, names, names_to_control):
             df[name+' stem eval'] = df["lemma"] == df[name+'_stem']            
     #~ print  df[df.root != df["custom_roots"]][['word','root',"custom_roots",]]                
     return df
+
 if __name__ == '__main__':
     
     args = grabargs()
@@ -341,7 +169,6 @@ if __name__ == '__main__':
         print " Can't Open the given File ", filename;
         sys.exit();
 
-    # filter stopwords and non arabic words
     
     # prepare stemmers
     names = read_config.read_stemmers(STEMMERS_CONFIG,"tashaphyne")
@@ -359,10 +186,6 @@ if __name__ == '__main__':
     # save file on csv
     df2.to_csv(outfile, sep='\t', encoding='utf-8')
     
-    #~ dstats = calcul_stats(df2, names, stem_flag = True)
-
-    #~ dstats.to_csv(outfile+".stats", sep='\t', encoding='utf-8')    
-    #~ print(dstats)
 
 
 

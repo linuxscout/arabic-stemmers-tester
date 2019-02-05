@@ -25,7 +25,6 @@ import re
 import argparse
 import os
 import pandas as pd
-#~ from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -45,45 +44,118 @@ def grabargs():
                         help="Test all stemmers.")
     args = parser.parse_args()
     return args
-def visualize_latex(dtf , columns, outfile):
-    """ convert data into latex table """
-    df2 = dtf[columns]
-    df2.to_latex(outfile+".tex", bold_rows= True, encoding='utf8')
-    print("Data is written in %s"%outfile+".tex")
+
+class abstractVisualizer:
+    def __init(self, method='root'):
+        pass;
+    def pivot(self,method="root"):
+        pass
+    def global_stats(self, method="root"):
+        pass
+    def display(self,):
+        pass
+    def save(self,):
+        pass
     
-def visualize_latex_string(dtf , caption="", label=""):
-    """ convert data into latex table """
-    #~ if columns:
-        #~ df2 = dtf[df['method']==method, df['average']==metric_class]
-    #~ else:
-        #~ df2 = dtf
-    #~ df2 = dtf[dtf['method']==method & dtf['average']==metric_class]
-    df2= dtf
-    tex = """\\begin{table} 
+class csvVisualizer(abstractVisualizer):
+    def __init(self, method='root'):
+        abstractVisualizer.__init(self, method)
+
+class latexVisualizer():
+    def __init__(self, method='root'):
+        #~ abstractVisualizer.__init(self, method)
+        self.tex = u""
+       
+    def save(self, outfile):
+        """ convert data into latex table """
+        tex_doc =u"""\\documentclass[12pt]{report}
+\\usepackage[utf8]{inputenc}
+\\usepackage{amsmath}
+\\usepackage{amsfonts}
+\\usepackage{amssymb}
+\\usepackage{graphicx}
+\\usepackage{booktabs}
+\\author{Taha Zerrouki}
+\\begin{document}
 %s
-\\caption{%s}
-\\label{%s:table}
-\\end{table}""" %(df2.to_latex(bold_rows= True, encoding='utf8'),
-    caption, label,
-    )
-    return tex+'\n'
-    #~ print("Data is written in %s"%outfile+".tex")
-    
-    
-def figure_latex_string(caption="", label=""):
-    """ return a figure latex code """
-    tex = """
-\\begin{figure}
-    \\centering
-    \\includegraphics[width=0.7\\linewidth]{images/%s}
+\\end{document}"""%self.tex
+
+        try:
+            outputfile = open(outfile+".tex","w")
+        except:
+            print ("Can't open file %s"%outfile)
+            sys.exit()
+
+        outputfile.write(tex_doc)
+        outputfile.close()
+        
+        
+        
+    def latex_string(self,dtf , caption="", label=""):
+        """ convert data into latex table """
+        tex = """\\begin{table} 
+    %s
     \\caption{%s}
-    \\label{fig:%s}
-\\end{figure}
-    """ %(label, caption, label,
-    )
-    return tex+'\n'
-    #~ print("Data is written in %s"%outfile+".tex")
+    \\label{%s:table}
+    \\end{table}""" %(dtf.to_latex(bold_rows= True, encoding='utf8'),
+        caption, label,
+        )
+
+        tex+='\n'
+        self.tex += tex    
+        return tex
+       
+    def figure_latex_string(self, caption="", label=""):
+        """ return a figure latex code """
+        tex = """
+    \\begin{figure}
+        \\centering
+        \\includegraphics[width=0.7\\linewidth]{images/%s}
+        \\caption{%s}
+        \\label{fig:%s}
+    \\end{figure}
+        """ %(label, caption, label,
+        )
+        tex+='\n'
+        self.tex += tex    
+        return tex        
     
+
+    
+def generate_pivots(df_global, method, field):
+
+        dfg= df_global[(df_global['method']==method)]
+
+        # pivoting table
+        df_pivot = dfg.pivot(index='name', columns='dataset', values=field)
+        # the latex code in not ordered to get homogenous tables
+        # order by best max, in order to get a readable chart
+        df_pivot.sort_values(by='gold', ascending = True, inplace=True)        
+
+        # pivot global
+        df_pivot_global = dfg.pivot(index='name', columns='dataset',)
+        
+        return df_pivot_global, df_pivot
+        
+def plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir):
+        """ display a plot and latex """
+        caption =   "%s for %s Extraction evaluation"%(field, method)        
+        label = "%s-%s"%(method, field.replace(' ','-'))
+        # generate the plot
+        plt.figure()
+        df_pivot.plot(rot=15)
+        plt.savefig(os.path.join(outdir, "images/%s.png"%label))  
+        df_pivot.to_csv(os.path.join(outdir,"pivots/%s.csv"%label), sep='\t',encoding='utf8')
+
+        df_pivot_global.to_csv(os.path.join(outdir,"pivots/global-%s.csv"%method), sep='\t',encoding='utf8')
+        # generate data to latex
+        latexer.latex_string(df_pivot, caption=caption, label=label)
+        # generate the latex figure code
+        latexer.figure_latex_string(caption=caption, label=label)
+        # generate data to latex
+        latexer.latex_string(df_pivot_global, caption="Global pivot", label="globle pivot")
+        # save
+        #~ latexer.save(outputfile)
 
 def main():
     print("""
@@ -127,132 +199,40 @@ output file:
         "kb":{'filename': 'output/stats/kabi.csv.stats', 'desc':"Kabi Corpus"},
     }
     pd.options.display.float_format = '{:,.2f}'.format
-    try:
-        outputfile = open(outfile+".tex","w")
-    except:
-        print ("Can't open file %s"%outfile)
-        sys.exit()
+
     frames = []
-    tex_header ="""\\documentclass[12pt]{report}
-\\usepackage[utf8]{inputenc}
-\\usepackage{amsmath}
-\\usepackage{amsfonts}
-\\usepackage{amssymb}
-\\usepackage{graphicx}
-\\usepackage{booktabs}
-\\author{Taha Zerrouki}
-\\begin{document}
-"""
-    outputfile.write(tex_header)
-    for key in names:
-        filename = names[key]["filename"]
-        df = pd.read_csv(filename, delimiter='\t',
-              encoding = "utf-8",
-              dtype = columns_type, 
-              )
-        # rename first columns
-        #~ u'Unnamed: 0'
-        #~ df = df.rename(columns={u'Unnamed: 0': 'stemmer', })
-        #add a new columns
-        df['dataset'] = key
-        # add frame to list in order to merge all data
-        frames.append(df)
+    latexer = latexVisualizer()
+    dataframes ={"root":None, "stem":None, "lemma":None}
 
-        print df.head(2)
-        if detailed_tables:
-
-            mytables=[{'caption'   : "Linguistic Accuracy and Micro classification F1-score on %s dataset "%names[key]["desc"],
-                'label' : "%s-micro"%key,
-                'method':'root', 'average':'micro',
-                },
-                #~ {
-                #~ 'caption'   : "Macro classification on %s dataset "%names[key]["desc"],
-                #~ 'label' : "%s-macro"%key,
-                #~ 'method':'root', 'average':'macro',
-                #~ },
-                {
-                'caption'   : "Stem Extraction evaluation  Micro classification on %s dataset "%names[key]["desc"],
-                'label' : "%s-stmmicro"%key,
-
-                'method':'stem', 'average':'micro',            
-                },
-                #~ {
-                #~ 'caption'   : "Stem Extraction evaluation  Macro classification on %s dataset "%names[key]["desc"],
-                #~ 'label' : "%s-stmmacro"%key,
-
-                #~ 'method':'stem', 'average':'macro',
-                #~ },
-                ]
-            for mytab in mytables:
-                outputfile.write("%% test of %s\n"%key)    
-                caption   = "Linguistic Accuracy and Micro classification F1-score on %s dataset "%names[key]["desc"]
-                label = "%s-micro"%key
-                df_c = df[(df.method ==mytab['method'])&(df['average'] == mytab['average'])]
-                tex = visualize_latex_string( df_c, mytab['caption'], mytab['label'])
-                outputfile.write(tex)
-
-
-    # merge all data to build a pivot table
-    df_global = pd.concat(frames)
+    for method in ('root','stem'):
+        for key in names:
+            filename = names[key]["filename"]+"."+method
+            df = pd.read_csv(filename, delimiter='\t', 
+                  encoding = "utf-8",
+                  dtype = columns_type, 
+                  )
+            #add a new columns
+            df['dataset'] = key
+            # add frame to list in order to merge all data
+            frames.append(df)
+            #~ print df.head(2)
+        # merge all data to build a pivot table
+        dataframes[method] = pd.concat(frames)
     #  CHarts to generate 
     mycharts=[
-    {'method':'root', 'average':'micro',
-    'field':'Accuracy', 'caption':"Root Extraction evaluation,Linguistic accuracy "},
-    {'method':'root', 'average':'micro',
-    'field':'F1 score', 'caption':"Root Extraction evaluation, Micro classification "},
-    #~ {'method':'root', 'average':'macro',
-    #~ 'field':'F1 score','caption':"Root Extraction evaluation, Macro classification "},
-    {'method':'stem', 'average':'micro',
-    'field':'F1 score', 'caption':"Stem Extraction evaluation, Micro classification "},
-    {'method':'stem', 'average':'micro',
-    'field':'Accuracy', 'caption':"Stem Extraction evaluation, Micro classification "},
-    #~ {'method':'stem', 'average':'macro',
-    #~ 'field':'F1 score', 'caption':"Stem Extraction evaluation, Micro classification "},
+    {'method':'root', 'field':'Accuracy'},
+    {'method':'root', 'field':'F1 score'},
+    {'method':'stem', 'field':'F1 score'},
+    {'method':'stem', 'field':'Accuracy'},
     ]
     for mych in mycharts:
         field = mych.get('field','')
-        caption =   mych.get('caption','') 
         method =  mych.get('method','') 
-        average =  mych.get('average','') 
-        label = "%s-%s-%s"%(method, average, field.replace(' ','-'))
-        dfg= df_global[(df_global['method']==method) & (df_global['average']==average )]
-        #~ print dfg.head(5)
-        #~ continue
-        # pivoting table
-        df_pivot = dfg.pivot(index='name', columns='dataset', values=field)
-        
-        
-        # generate data to latex
-        tex = visualize_latex_string(df_pivot, caption=caption, label=label)
-        outputfile.write(tex)
+        df_global = dataframes[method]
+        df_pivot_global, df_pivot = generate_pivots(df_global, method, field) 
+        plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir)
+    latexer.save(outfile)
 
-        # the latex code in not ordered to get homogenous tables
-        # order by best max, in order to get a readable chart
-        df_pivot.sort_values(by='gold', ascending = True, inplace=True)        
-        # generate the latex figure code
-        tex = figure_latex_string(caption=caption, label=label)
-        outputfile.write(tex)
-
-        # generate the plot
-        plt.figure()
-        df_pivot.plot(rot=15)
-        plt.savefig(os.path.join(outdir, "images/%s.png"%label))  
-        df_pivot.to_csv(os.path.join(outdir,"pivots/%s.csv"%label), sep='\t',encoding='utf8')
-
-    # pivot global
-    method = "root"
-    average = "micro"
-    dfg = df_global[(df_global['method']==method) & (df_global['average']==average )]
-    df_pivot = dfg.pivot(index='name', columns='dataset',)
-    
-    # generate data to latex
-    tex = visualize_latex_string(df_pivot, caption="Global pivot", label="globle pivot")
-    outputfile.write(tex)
-
-    df_pivot.to_csv(os.path.join(outdir,"pivots/global.csv"), sep='\t',encoding='utf8')
-
-    tex_footer =u"""\\end{document}"""
-    outputfile.write(tex_footer)
     df_global.to_csv(os.path.join(outdir,"global.stats.csv"), sep='\t', encoding='utf8')
     print("Global Stats are stored in output/global.stats.csv")
     print("Pivots tables Stats are stored in output/pivots/*.csv")

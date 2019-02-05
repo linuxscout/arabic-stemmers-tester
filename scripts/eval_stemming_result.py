@@ -22,15 +22,11 @@ sys.path.append('../rooter')
 sys.path.append('rooter')
 sys.path.append('../')
 
-import re
+#~ import re
 import argparse
-import os
-import abstractstemmer
 import pandas as pd
-import pyarabic.araby as araby
-from stopwords.arabicstopwords import is_stop
-from test_stemmers_rooters import calcul_stats
-from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score
+from eval_functions import calcul_stats
+import abstracttester
 import read_config
 STEMMERS_CONFIG = "stemmers.conf"
 
@@ -52,23 +48,12 @@ def grabargs():
     args = parser.parse_args()
     return args
 
-def is_valid_word(word):
-    """
-    The word is removed if it's not an arabic word or it's a stop word
-    """
-    if is_stop(word):
-        return False
-    elif not araby.is_arabicword(word):
-        return False
-    else:
-        return True
         
 def main():
         
     args =grabargs()
     filename = args.filename
     outfile = args.outfile
-    #~ data_directory = args.data_directory
     all_stemmers = args.all
 
     try:
@@ -96,9 +81,14 @@ def main():
         print ("Error on reading config file %s"%STEMMERS_CONFIG)
         sys.exit()    
      
-
-    dstats = calcul_stats(df, names, stem_flag = True)
-    dstats.to_csv(outfile, sep='\t', encoding='utf-8')    
+    # root
+    tester = abstracttester.factory_tester.create_tester("root")
+    dstats = tester.calcul_stats(df, names)
+    dstats.to_csv(outfile+".root", sep='\t', encoding='utf-8')    
+    # stem
+    tester = abstracttester.factory_tester.create_tester("stem")
+    dstats = tester.calcul_stats(df, names)
+    dstats.to_csv(outfile+".stem", sep='\t', encoding='utf-8')    
     print(dstats)
     
 if __name__ == '__main__':
