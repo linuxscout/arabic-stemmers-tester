@@ -31,7 +31,7 @@ import numpy as np
 from sklearn.metrics import precision_score, recall_score,  accuracy_score, f1_score, confusion_matrix
 import pyarabic.araby as araby
 import read_config
-STEMMERS_CONFIG = "stemmers.conf"
+STEMMERS_CONFIG = "conf/stemmers.conf"
 def grabargs():
     parser = argparse.ArgumentParser(description='Convert Quran Corpus into CSV format.')
     # add file name to import and filename to export

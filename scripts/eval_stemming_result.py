@@ -25,10 +25,10 @@ sys.path.append('../')
 #~ import re
 import argparse
 import pandas as pd
-from eval_functions import calcul_stats
+#~ from eval_functions import calcul_stats
 import abstracttester
 import read_config
-STEMMERS_CONFIG = "stemmers.conf"
+STEMMERS_CONFIG = "conf/stemmers.conf"
 
 def grabargs():
     parser = argparse.ArgumentParser(description='Convert Quran Corpus into CSV format.')
