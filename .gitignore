@@ -110,6 +110,7 @@ venv.bak/
 /samples/quran_word_v0.5.csv
 /samples/quran_word_v0.5.csv.khoja
 /resources/*
+/releases/*
 /to export/*
 /prepare_dataset/output/*
 /output/*
@@ -119,3 +120,25 @@ venv.bak/
 /doc/control-golden.csv
 /cache/*
 /archives/*
+/doc/.~lock.test-enhance.xlsx#
+/doc/26-1-2019-NAFIS-maually.xlsx
+/doc/accuracy-TP-FP.docx
+/doc/accuracy-TP-FP.odt
+/doc/accuracy-TP-FP.pdf
+/doc/test-afterTeh stamp.xsls.ods
+/doc/test-afterTeh stamp.xsls.xlsx
+/doc/test-enhance.ods
+/doc/test-enhance.xlsx
+/doc/test-separted-algos+moataz.xlsx
+/doc/test-separted-algos.xlsx
+/doc/visualize-eval.tex
+/doc/visualize-eval.xlsx
+/doc/تقرير عن استعمال سفر.docx
+/doc/تقرير عن استعمال سفر.odt
+/doc/غير معنون 1.odt
+/doc/غير معنون 1.pdf
+/rooter/affix_const.old.py
+/scripts/archives/print_stamp_dict.py
+/scripts/archives/show_datasets_stats.py
+/scripts/archives/test_assem_isri_stemmer.py
+/scripts/archives/test_show_result.py
