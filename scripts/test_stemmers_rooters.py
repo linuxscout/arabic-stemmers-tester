@@ -47,6 +47,9 @@ def grabargs():
     parser.add_argument("--all", type=bool, nargs='?',
                         const=True, 
                         help="Test all stemmers.")
+    parser.add_argument("--config", type=str, nargs='?',
+                        const="", 
+                        help="Test some stemmers cited in config file .")
     args = parser.parse_args()
     return args
     
@@ -150,6 +153,9 @@ if __name__ == '__main__':
     args = grabargs()
     filename = args.filename
     outfile = args.outfile
+    stemmers_class_config = args.config
+    #~ print stemmers_class_config
+
     #~ data_directory = args.data_directory
     all_stemmers = args.all
     data_dir = args.data_directory
@@ -169,13 +175,17 @@ if __name__ == '__main__':
         print " Can't Open the given File ", filename;
         sys.exit();
 
-    
+    # used to choose between stemmers classes, in order to avoid re-runing
+    if not stemmers_class_config:
+        # here we test only tahasphyne derived stemmers
+        stemmers_class_config = "tashaphyne"
     # prepare stemmers
-    names = read_config.read_stemmers(STEMMERS_CONFIG,"tashaphyne")
+    names = read_config.read_stemmers(STEMMERS_CONFIG,stemmers_class_config)
     if not names:
         print ("Error on reading config file %s"%STEMMERS_CONFIG)
         sys.exit()
-
+    #~ print(names)
+    #~ sys.exit()
     # add some stemmers to be controled under csv file 
     # show conditions
     #~ names_to_control =["rhyzome","default","custom-root"]

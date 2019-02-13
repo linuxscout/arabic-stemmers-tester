@@ -44,7 +44,7 @@ class abstractTester:
         choices = origin.split(';')
         return output in choices 
               
-    def equal(self, output, origin):
+    def equal2(self, output, origin):
         """ test if calcuated is equal to origin """
         # test if normalized choices are equal
         # Todo
@@ -58,24 +58,39 @@ class abstractTester:
             choices = [self.normalize(s) for s in choices]
             return self.normalize(output) in choices
         return False
+    def equal(self, output, origin):
+        """ test if calcuated is equal to origin """
+        # test if normalized choices are equal
+        # Todo
+        if output == origin:
+            return True
+        elif len(output) == len(origin):
+            return output == self.normalize(origin)
+        else:
+            #~ if ";" in origin: # multipe choices
+            choices = origin.split(';')
+            choices = [self.normalize(s) for s in choices]
+            return output in choices
+        return False
 
-    def metric_test(self,  calculated, origin):
+    def metric_test(self,  origin, calculated):
         """  Calculate TP, TN, FP, FN """
         # how to examin metrics
         # TP : calculted   is in _orginal
         # TN : calculted   is null and   _orginal is null
         # FP : calculted   is not null and   _orginal is null
         # FN : calculted   is incorrect and   _orginal is not null
-        
-        if not self.is_valid(origin)  and not self.is_valid(calculated) :
+        valid_origin = self.is_valid(origin)
+        valid_calculated = self.is_valid(calculated)
+        if not valid_origin and not valid_calculated :
                 return "TN"
-        elif not self.is_valid(origin)  and self.is_valid(calculated) :
+        elif not valid_origin and valid_calculated :
                 return "FP"
-        elif self.is_valid(origin) and not self.is_valid(calculated):
+        elif valid_origin and not valid_calculated:
             return "FN"
-        elif self.is_valid(origin) and self.is_valid(calculated):    
-            s = origin.split(';')
-            if calculated in s:
+        elif valid_origin and valid_calculated:    
+            #~ s = origin.split(';')
+            if self.equal(calculated, origin):
                 return "TP"
             else:
                 return "FN"
@@ -92,8 +107,12 @@ class abstractTester:
             # to do remove
             #~ df['Value'] = df.apply(lambda row: self.my_test(row['root'], row[name]), axis=1)
             #~ cpt = df[df.Value == True][name].count()
+            if self.method == "stem":
+                key = name+'_stem'
+            else:
+                key = name
 
-            df['metric'] = df.apply(lambda row: self.metric_test(row[self.target_column], row[name]), axis=1)
+            df['metric'] = df.apply(lambda row: self.metric_test(row[self.target_column], row[key]), axis=1)
 
             TP = df[df.metric == "TP"][name].count()
             TN = df[df.metric == "TN"][name].count()
@@ -126,6 +145,8 @@ class stemmingTester(abstractTester):
         #load parent
         self.method = "stem"
         self.target_column = "lemma"
+        self.normalize_full = True
+        
     def is_valid(self, stem):
         """ is a valid stem"""
         # if word is null
@@ -145,7 +166,7 @@ class stemmingTester(abstractTester):
     
     def normalize(self, word):
         """  normalize the stem """
-        if normalize_full:
+        if self.normalize_full:
             word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
             word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)
             word = word.replace(araby.YEH_HAMZA,araby.HAMZA)

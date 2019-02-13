@@ -109,6 +109,7 @@ venv.bak/
 /samples/quran_word_v0.4_khoja.csv
 /samples/quran_word_v0.5.csv
 /samples/quran_word_v0.5.csv.khoja
+/resources/*
 /to export/*
 /prepare_dataset/output/*
 /output/*

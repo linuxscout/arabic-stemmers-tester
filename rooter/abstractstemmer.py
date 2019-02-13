@@ -251,7 +251,7 @@ class customStemmer_lemmatizer(abstractStemmer):
         """ get a stem from word"""
         self.light_stem(word)
         return self.get_root()
-    def verify_affix2(self, affix_tuple):
+    def verify_affix(self, affix_tuple):
         #مراجعة مبسطة
         # أل التعريف مع ضمير متصل
         prefix = affix_tuple.get('prefix', '')
@@ -268,7 +268,7 @@ class customStemmer_lemmatizer(abstractStemmer):
                 return False
         return True
         
-    def verify_affix(self, affix_tuple):
+    def verify_affix2(self, affix_tuple):
         """
         Verify possible affixes in the resulted segments
         according to the given affixes list.

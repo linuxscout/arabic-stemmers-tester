@@ -56,11 +56,14 @@ def read_stemmers(filename, select = "all"):
     our = ast.literal_eval(config.get('Stemmers','our'))
     #~ print(our)
     others = ast.literal_eval(config.get('Stemmers','others'))
+    assem = ast.literal_eval(config.get('Stemmers','assem'))
     #~ print(others)
     if select in ("our", "tashaphyne"):
         return our
     elif select == "others":
         return others
+    elif select == "assem":
+        return assem
     else:
         return others + our
 
