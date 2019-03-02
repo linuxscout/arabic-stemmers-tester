@@ -39,13 +39,20 @@ from pyarabic.arabrepr import arepr
 import lemmatizer
 #~ CUSTOM_PREFIX_LIST = [u'كال', u'أفبال', u'أفك', u'فك', u'أولل', u'', u'أف', u'ول', u'أوال', u'ف', u'و', u'أو', u'ولل', u'فب', u'أول', u'ألل', u'لل', u'ب', u'وكال', u'أوب', u'بال', u'أكال', u'ال', u'أب', u'وب', u'أوبال', u'أ', u'وبال', u'أك', u'فكال', u'أوك', u'فلل', u'وك', u'ك', u'أل', u'فال', u'وال', u'أوكال', u'أفلل', u'أفل', u'فل', u'أال', u'أفكال', u'ل', u'أبال', u'أفال', u'أفب', u'فبال']
 #~ CUSTOM_SUFFIX_LIST = [u'كما', u'ك', u'هن', u'ي', u'ها', u'', u'ه', u'كم', u'كن', u'هم', u'هما', u'نا']
-CUSTOM_SUFFIX_LIST = absconst.STEMMING_SUFFIX_LIST
-CUSTOM_PREFIX_LIST = absconst.STEMMING_PREFIX_LIST
+#~ CUSTOM_SUFFIX_LIST = absconst.STEMMING_SUFFIX_LIST
+#~ CUSTOM_PREFIX_LIST = absconst.STEMMING_PREFIX_LIST
 
-NOUN_PREFIX_LIST = absconst.NOUN_PREFIX_LIST
-NOUN_SUFFIX_LIST = absconst.NOUN_SUFFIX_LIST
-VERB_PREFIX_LIST = absconst.VERB_PREFIX_LIST
-VERB_SUFFIX_LIST = absconst.VERB_SUFFIX_LIST
+#~ NOUN_PREFIX_LIST = absconst.NOUN_PREFIX_LIST
+#~ NOUN_SUFFIX_LIST = absconst.NOUN_SUFFIX_LIST
+#~ VERB_PREFIX_LIST = absconst.VERB_PREFIX_LIST
+#~ VERB_SUFFIX_LIST = absconst.VERB_SUFFIX_LIST
+CUSTOM_SUFFIX_LIST = affix_const.STEMMING_SUFFIX_LIST
+CUSTOM_PREFIX_LIST = affix_const.STEMMING_PREFIX_LIST
+
+NOUN_PREFIX_LIST = affix_const.NOUN_PREFIX_LIST
+NOUN_SUFFIX_LIST = affix_const.NOUN_SUFFIX_LIST
+VERB_PREFIX_LIST = affix_const.VERB_PREFIX_LIST
+VERB_SUFFIX_LIST = affix_const.VERB_SUFFIX_LIST
 ALEFAT_PAT = re.compile(u"["+u"".join([araby.ALEF_MADDA, araby.ALEF_HAMZA_ABOVE,
                                        araby.ALEF_HAMZA_BELOW, araby.HAMZA_ABOVE,
                                        araby.HAMZA_BELOW])+u"]")
@@ -128,6 +135,7 @@ class abstractStemmer(tashaphyne.stemming.ArabicLightStemmer):
                         "stop_words":"no",
         }
         self.debug_root = False
+        self.normalize_full = False
     def help(self,):
         return repr(self.config)
     def getstem(self, word):
@@ -141,7 +149,22 @@ class abstractStemmer(tashaphyne.stemming.ArabicLightStemmer):
         pass
     def verify_roots(self, root_list):
         pass
-        
+    def normalize(self, word):
+        """  normalize the stem """
+        if self.normalize_full:
+            word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
+            word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)
+            word = word.replace(araby.YEH_HAMZA,araby.HAMZA)
+            word = word.replace(araby.WAW_HAMZA,araby.HAMZA)
+            #~ word = word.replace(araby.YEH_HAMZA,araby.YEH)
+            #~ word = word.replace(araby.WAW_HAMZA,araby.WAW)
+            word = word.replace(araby.ALEF_MAKSURA, araby.YEH)
+            # to choose Teh marbuta as Heh or TEH or remove it
+            word = word.replace(araby.TEH_MARBUTA, "")
+            #~ word = word.replace(araby.TEH_MARBUTA, araby.TEH)
+
+        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+        return word        
 #Define an abstract Class for stemmer
 class multiStemmer(abstractStemmer):
     """ I will make more options for stemmer """
@@ -225,6 +248,7 @@ class customStemmer_lemmatizer(abstractStemmer):
         self.verb_affix_list = affix_const.VERB_AFFIX_LIST
         self.noun_affix_list = affix_const.NOUN_AFFIX_LIST
         self.lemmatizer = lemmatizer.lemmaDict()
+        self.normalize_full = True       
         
     def getstem(self,word):
         """ get a stem from word"""
@@ -234,9 +258,13 @@ class customStemmer_lemmatizer(abstractStemmer):
             self.segment(word)
             affixation_list = self.get_affix_list()
             # filter valid affixes
+            #~ print("Before filtering")
+            #~ print(arepr(affixation_list))
             affixation_list = filter(self.verify_affix, affixation_list)
 
-            return self.lemmatizer.choose_stem(affixation_list)
+            chosen = self.lemmatizer.choose_stem(affixation_list)
+            #~ return self.normalize(chosen)
+            return chosen
         else:
             return stop_stem(word)
     
@@ -251,24 +279,8 @@ class customStemmer_lemmatizer(abstractStemmer):
         """ get a stem from word"""
         self.light_stem(word)
         return self.get_root()
+       
     def verify_affix(self, affix_tuple):
-        #مراجعة مبسطة
-        # أل التعريف مع ضمير متصل
-        prefix = affix_tuple.get('prefix', '')
-        suffix = affix_tuple.get('suffix', '')
-        if ((u"ال" in prefix or u"لل" in prefix) and 
-            (u'ه' in suffix or u'ك' in suffix)
-            ):
-                return False
-        # حروف الجر مع واو جمع مذكر سالم
-        #ولمثنى المرفوع
-        if ((u"ك" in prefix or u"ب" in prefix or u"لل" in prefix) and 
-            (u'و' in suffix or u'ان' in suffix)
-            ):
-                return False
-        return True
-        
-    def verify_affix2(self, affix_tuple):
         """
         Verify possible affixes in the resulted segments
         according to the given affixes list.
@@ -309,6 +321,7 @@ class customStemmer_lemmatizer_tag(abstractStemmer):
         # noun stemmer config
         # create stemmer
         self.noun_stemmer = abstractStemmer()
+        self.affix_list = affix_const.AFFIX_LIST
         # config prefix and suffix list
         self.noun_stemmer.set_prefix_list(NOUN_PREFIX_LIST)
         self.noun_stemmer.set_suffix_list(NOUN_SUFFIX_LIST)
@@ -318,18 +331,40 @@ class customStemmer_lemmatizer_tag(abstractStemmer):
         # config prefix and suffix list
         self.verb_stemmer.set_prefix_list(VERB_PREFIX_LIST)
         self.verb_stemmer.set_suffix_list(VERB_SUFFIX_LIST)             
-        
+        self.affix_list = affix_const.AFFIX_LIST
+        self.verb_affix_list = affix_const.VERB_AFFIX_LIST
+        self.noun_affix_list = affix_const.NOUN_AFFIX_LIST        
     def getstem(self,word):
         """ get a stem from word"""
+        word_in = word
         if not is_stop(word):
             word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
-            self.light_stem(word)
-            self.segment(word)
-            affixation_list = self.get_affix_list()
+            
+            if self.is_noun(word_in) and not self.is_verb(word_in):
+                self.noun_stemmer.light_stem(word)
+                self.noun_stemmer.segment(word)
+                affixation_list= self.noun_stemmer.get_affix_list()
+                affixation_list = filter(self.verify_affix, affixation_list)
+                return self.lemmatizer.choose_stem(affixation_list, "verb")
+               
+                
+            elif self.is_verb(word_in) and not self.is_noun(word_in):
+                self.verb_stemmer.light_stem(word)
+                self.verb_stemmer.segment(word)
+                affixation_list= self.verb_stemmer.get_affix_list()
+                affixation_list = filter(self.verb_verify_affix, affixation_list)
+                return self.lemmatizer.choose_stem(affixation_list, "noun")
+            else:
+                self.light_stem(word)
+                self.segment(word)
+                affixation_list = self.get_affix_list()
+                # filter valid affixes
+                affixation_list = filter(self.noun_verify_affix, affixation_list)
+                chosen = self.lemmatizer.choose_stem(affixation_list)
+                #~ return self.normalize(chosen)
+                return chosen                
             # filter valid affixes
-            affixation_list = filter(self.verify_affix, affixation_list)
 
-            return self.lemmatizer.choose_stem(affixation_list)
         else:
             return stop_stem(word)
     
@@ -344,23 +379,46 @@ class customStemmer_lemmatizer_tag(abstractStemmer):
         """ get a stem from word"""
         self.light_stem(word)
         return self.get_root()
-    def verify_affix(self, affix_tuple):
-        #مراجعة مبسطة
-        # أل التعريف مع ضمير متصل
+    def verb_verify_affix(self, affix_tuple):
+        return self.verify_affix(affix_tuple, "verb")
+    def noun_verify_affix(self, affix_tuple):
+        return self.verify_affix(affix_tuple, "noun")
+    
+    def verify_affix(self, affix_tuple, wtype=""):
+        """
+        Verify possible affixes in the resulted segments
+        according to the given affixes list.
+        @param word: the input word.
+        @type word: unicode.
+        @param list_seg: list of word segments indexes (numbers).
+        @type list_seg: list of pairs.
+        @return: list of acceped segments.
+        @rtype: list of pairs.
+        """
         prefix = affix_tuple.get('prefix', '')
         suffix = affix_tuple.get('suffix', '')
-        if ((u"ال" in prefix or u"لل" in prefix) and 
-            (u'ه' in suffix or u'ك' in suffix)
-            ):
-                return False
-        # حروف الجر مع واو جمع مذكر سالم
-        #ولمثنى المرفوع
-        if ((u"ك" in prefix or u"ب" in prefix or u"لل" in prefix) and 
-            (u'و' in suffix or u'ان' in suffix)
-            ):
-                return False
-        return True        
-
+        stem   = affix_tuple.get('stem','') 
+        affix = prefix+'-'+suffix
+        if affix in self.affix_list:
+            #~ return True
+            if wtype=="verb":
+                return affix in self.verb_affix_list #and self.lemmatizer.is_valid_verb_stem(stem, prefix, suffix)
+            elif wtype=="noun":
+                return  affix in self.noun_affix_list #and self.lemmatizer.is_valid_noun_stem(stem, prefix, suffix)
+                #~ return True
+            else :
+                return affix in self.affix_list
+                #~ return True
+        return False      
+    def is_verb(self,word):
+        """ is verb word"""
+        #~ return True
+        return self.tagger.is_verb(word)
+        return False
+    def is_noun(self, word):
+        """ is noun word"""
+        return self.tagger.is_noun(word)
+        #~ return False
 
 class customStemmer_stp(abstractStemmer):
     """ I will make more options for stemmer """
@@ -566,7 +624,8 @@ class customStemmer_tag_root(abstractStemmer):
         self.verb_stemmer = abstractStemmer()
         # config prefix and suffix list
         self.verb_stemmer.set_prefix_list(VERB_PREFIX_LIST)
-        self.verb_stemmer.set_suffix_list(VERB_SUFFIX_LIST)        
+        self.verb_stemmer.set_suffix_list(VERB_SUFFIX_LIST) 
+             
     def is_verb(self,word):
         """ is verb word"""
         #~ return True
@@ -641,13 +700,16 @@ class customStemmer_tag_root(abstractStemmer):
     def verify_roots(self, root_list):
         pass
         
-
+       
 
 class customStemmer_tag(customStemmer_tag_root):
     """ I will make more options for stemmer """
     def __init__(self,):
         #~ abstractStemmer.__init__(self)
         customStemmer_tag_root.__init__(self)
+        self.affix_list = affix_const.AFFIX_LIST
+        self.verb_affix_list = affix_const.VERB_AFFIX_LIST
+        self.noun_affix_list = affix_const.NOUN_AFFIX_LIST          
 
     def getroot(self,word):
         """ get a stem from word"""
@@ -683,8 +745,88 @@ class customStemmer_tag(customStemmer_tag_root):
         else:
             return stop_root(word)
             
+    def getstem(self,word):
+        """ get a stem from word"""
+        word_in = word
+        if not is_stop(word):
+            word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
             
-    def verify_affix(self, affix_tuple):
+            if self.is_noun(word_in) and not self.is_verb(word_in):
+                self.noun_stemmer.light_stem(word)
+                self.noun_stemmer.segment(word)
+                affixation_list= self.noun_stemmer.get_affix_list()
+                affixation_list = filter(self.verify_affix, affixation_list)
+                return self.choose_stem(affixation_list, "verb")
+               
+                
+            elif self.is_verb(word_in) and not self.is_noun(word_in):
+                self.verb_stemmer.light_stem(word)
+                self.verb_stemmer.segment(word)
+                affixation_list= self.verb_stemmer.get_affix_list()
+                affixation_list = filter(self.verb_verify_affix, affixation_list)
+                return self.choose_stem(affixation_list, "noun")
+            else:
+                self.light_stem(word)
+                self.segment(word)
+                affixation_list = self.get_affix_list()
+                # filter valid affixes
+                affixation_list = filter(self.noun_verify_affix, affixation_list)
+                chosen = self.choose_stem(affixation_list)
+                #~ return self.normalize(chosen)
+                return chosen                
+            # filter valid affixes
+
+        else:
+            return stop_stem(word)
+    
+
+
+    def choose_stem2(self, affixa_list, word_type=""):
+        stems = [d['stem'] for d in affixa_list]
+        stems = list(set(stems))
+        stem = min(stems, key=len)
+        return stem
+
+    def choose_stem(self, affixa_list, word_type=""):
+        #~ stems = [d['stem'] for d in affixa_list]
+        stems = [d['stem'] for d in affixa_list if len(d['stem']) >=len(d['suffix']) and len(d['stem']) >=len(d['prefix']) ]
+        stems = list(set(stems))
+        stem = min(stems, key=len)
+        return stem 
+    
+    def verify_affix(self, affix_tuple, wtype=""):
+        """
+        Verify possible affixes in the resulted segments
+        according to the given affixes list.
+        @param word: the input word.
+        @type word: unicode.
+        @param list_seg: list of word segments indexes (numbers).
+        @type list_seg: list of pairs.
+        @return: list of acceped segments.
+        @rtype: list of pairs.
+        """
+        prefix = affix_tuple.get('prefix', '')
+        suffix = affix_tuple.get('suffix', '')
+        stem   = affix_tuple.get('stem','') 
+        affix = prefix+'-'+suffix
+        if affix in self.affix_list:
+            #~ return True
+            if wtype=="verb":
+                return affix in self.verb_affix_list #and self.lemmatizer.is_valid_verb_stem(stem, prefix, suffix)
+            elif wtype=="noun":
+                return  affix in self.noun_affix_list #and self.lemmatizer.is_valid_noun_stem(stem, prefix, suffix)
+                #~ return True
+            else :
+                return affix in self.affix_list
+                #~ return True
+        return False      
+    def verb_verify_affix(self, affix_tuple):
+        #~ return self.verify_affix(affix_tuple, "")
+        return self.verify_affix(affix_tuple, "verb")
+    def noun_verify_affix(self, affix_tuple):
+        #~ return self.verify_affix(affix_tuple, "")
+        return self.verify_affix(affix_tuple, "noun")
+    def verify_affix2(self, affix_tuple, word_tyep=""):
         #مراجعة مبسطة
         # أل التعريف مع ضمير متصل
         prefix = affix_tuple.get('prefix', '')
@@ -949,6 +1091,8 @@ class factory_stemmer(object):
             asl = multiStemmer()
         elif name == "lemmatizer":
             asl = customStemmer_lemmatizer()
+        elif name == "lemmatizer-tag":
+            asl = customStemmer_lemmatizer_tag()
         else:
             """ no options"""
             asl = abstractStemmer()            

@@ -11,11 +11,13 @@ EXTRN_DATA_DIR=output/processed
 #DataSets
 DATA_GOLD=gold.csv
 DATA_QC=qc.unq
-DATA_QI=quran_word_v0.5.2.csv
+#~ DATA_QI=quran_word_v0.5.2.csv
+DATA_QI=klm.csv
 DATA_NAFIS=nafis.unq
 DATA_WORDS=words.csv
 DATA_QWC=qwc.csv
-DATA_KB=kabi.csv
+#~ DATA_KB=kabi.csv
+DATA_KB=kabi.v2.csv
 # default data sets
 DATA=${DATA_QI}
 #External stemmers directories
@@ -201,7 +203,7 @@ visualize:
 debug_qwc:
 	python scripts/test_rooters_debug.py -f samples/qwc.csv -o output/qwc.debug.csv > output/qwc.debug
 debug_nafis:
-	python scripts/test_rooters_debug.py -f samples/nafis2.unq -o output/nafis.debug.csv > output/nafis.debug
+	python scripts/test_rooters_debug.py -f samples/nafis.unq -o output/nafis.debug.csv > output/nafis.debug
 debug_gold:
 	python scripts/test_rooters_debug.py -f samples/gold.csv -o output/gold.debug.csv > output/gold.debug
 debug_abdo:

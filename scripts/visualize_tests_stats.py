@@ -190,13 +190,14 @@ output file:
         'total':np.int64,
         }
 
-    names ={"qindex":{'filename':'output/stats/quran_word_v0.5.2.csv.stats', 'desc':'Quran word index'},
+    #~ names ={"qindex":{'filename':'output/stats/quran_word_v0.5.2.csv.stats', 'desc':'Quran word index'},
+    names ={"qindex":{'filename':'output/stats/klm.csv.stats', 'desc':'Quran word index'},
     
         "gold":{'filename':'output/stats/gold.csv.stats',  'desc':"Arabic Golden Corpus"},
         "nafis":{'filename':'output/stats/nafis.unq.stats', 'desc':"NAFIS"},
         "qcorpus":{'filename': 'output/stats/qc.unq.stats', 'desc':"Quranic Arabic Corpus"},
         "qwc":{'filename': 'output/stats/qwc.csv.stats', 'desc':"Mushaf Corpus"},
-        "kb":{'filename': 'output/stats/kabi.csv.stats', 'desc':"Kabi Corpus"},
+        "kb":{'filename': 'output/stats/kabi.v2.csv.stats', 'desc':"Kabi Corpus"},
     }
     pd.options.display.float_format = '{:,.2f}'.format
 

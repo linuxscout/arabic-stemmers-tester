@@ -30,7 +30,7 @@ from __future__ import (
 import pyarabic.araby as araby
 from pyarabic import stack
 from pyarabic.araby import FEH, LAM, AIN, HARAKAT
-import lemma_const
+#~ import lemma_const
 from pyarabic.arabrepr import arepr
 import re
 #create index  by word stampfor dictionary to accelerate word search.
@@ -64,8 +64,31 @@ WAZNS = {
          #~ "add_alef_maksura"
          ],
          #~ u"أفعال":["normalize_hamza",],
-         
-
+         }
+WAZNS_verbs = {
+         u'فتعل':["add_alef",],
+         u'فتع':["add_alef",  #"add_alef_maksura"
+         ],
+         u'فتيل':["add_alef","change_yeh"],
+        u"نفعل":["add_alef",],
+        u"نفع":["add_alef", 
+        #~ "add_alef_maksura"
+        ],
+        u"نفيل":["add_alef","change_yeh"],
+         u'ستفيل':["add_alef","change_yeh"],
+         u'ستفعل':["add_alef", "change_yeh"],
+         u'ستفع':["add_alef", 
+         #~ "add_alef_maksura"
+         ],
+         #~ u"أفعال":["normalize_hamza",],
+         }
+WAZNS_nouns = {
+         u"إفاع":["add_teh_marbuta",],
+         u"إفعال":["normalize_hamza",],
+         u'فتعال':["add_alef_noun", "normalize_hamza"],
+         u'ستفعال':["add_alef_noun", "normalize_hamza"],
+         u'نفعال':["add_alef_noun", "normalize_hamza"],
+         #~ u'فعال':["add_alef_hamza_noun", "normalize_hamza"],
          }
 
 class lemmaDict:
@@ -134,16 +157,22 @@ class lemmaDict:
             else:
                 return True
 
-    def get_wazn(self, stem):
+    def get_wazn(self, stem, word_type=""):
         """ validate stem agnaist Schemes أوزان"""
-        for wazn in WAZNS:
+        if word_type=="verb":
+            wazn_table = WAZNS_verbs
+        elif word_type=="noun":
+            wazn_table = WAZNS_nouns
+        else:
+            wazn_table = WAZNS
+        for wazn in wazn_table:
             #~ if araby.waznlike(starword,wazn):
             if len(wazn) == len(stem):
                 if self.waznlike2(stem, wazn):
                     return wazn
         return ""
 
-    def choose_stem(self, affixa_list):
+    def choose_stem(self, affixa_list, word_type=""):
         """ select a stem to return """
         stems = [d['stem'] for d in affixa_list]
         stems = list(set(stems))
@@ -159,13 +188,13 @@ class lemmaDict:
         chosen_affixa = [d for d in affixa_list if d['stem'] == stem]
         if ajust:
             for aff in chosen_affixa:
-                aff["stem"] = self.ajust_lemma(aff)
+                aff["stem"] = self.ajust_lemma(aff, word_type)
         #~ print(arepr(chosen_affixa))
         #choose the first one,
         # todo choose best one
         stem = chosen_affixa[0]['stem']
         return stem
-    def ajust_lemma(self, affixa):
+    def ajust_lemma(self, affixa, word_type=""):
         """ ajust lemma from stems"""
         
         # add Alef for some verbs
@@ -175,7 +204,7 @@ class lemmaDict:
         stem = affixa['stem']
 
         # get wazn like
-        wazn = self.get_wazn(stem)
+        wazn = self.get_wazn(stem, word_type)
         if wazn:
             actions = WAZNS[wazn]
             stem = self.do_actions(stem, actions, prefix, suffix)

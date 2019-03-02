@@ -31,10 +31,12 @@ import pyarabic.araby as araby
 from pyarabic import stack
 from pyarabic.araby import FEH, LAM, AIN, HARAKAT
 from pyarabic.arabrepr import arepr
-import roots_const
+
 import re
+#~ from . import factory_rooter
+#~ from . import roots_const        
 import factory_rooter
-        
+import roots_const        
 class rootDictionary:
     """ lookup for root list """
     def __init__(self,):
