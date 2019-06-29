@@ -17,6 +17,14 @@
 ::~ python scripts\test_assem_isri_stemmer.py -f samples\qwc.csv -o output\processed\qwc.csv --dir samples
 ::~ python scripts\test_assem_isri_stemmer.py -f samples\kabi.csv -o output\processed\kabi.csv --dir samples
 
+rem test_some_win:
+python scripts\test_stemmers_rooters.py -f samples\gold.csv -o output\gold.csv 
+python scripts\test_stemmers_rooters.py -f samples\qc.unq -o output\qc.unq 
+python scripts\test_stemmers_rooters.py -f samples\klm.csv -o output\klm.csv 
+python scripts\test_stemmers_rooters.py -f samples\nafis.unq -o output\nafis.unq 
+python scripts\test_stemmers_rooters.py -f samples\words.csv -o output\words.csv 
+python scripts\test_stemmers_rooters.py -f samples\qwc.csv -o output\qwc.csv 
+python scripts\test_stemmers_rooters.py -f samples\kabi.csv -o output\kabi.csv 
 
 rem eval_some_win:
 python scripts\eval_stemming_result.py -f output\joined\gold.csv -o output\stats\gold.csv.stats 

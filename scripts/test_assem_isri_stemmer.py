@@ -79,7 +79,7 @@ if __name__ == '__main__':
         sys.exit();
     # prepare stemmers
     # assem is a rooter
-    names = ["assem", "assem-stemmer","isri"]
+    names = ["assem", "assem-stemmer","isri", "arlstem"]
     if not names:
         print ("Error on reading config file %s"%STEMMERS_CONFIG)
         sys.exit()

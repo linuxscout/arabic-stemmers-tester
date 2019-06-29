@@ -27,6 +27,7 @@ import tashaphyne.stemming
 import tashaphyne.stem_const
 import abstract_stem_const as absconst 
 from nltk.stem.isri import ISRIStemmer
+from nltk.stem.arlstem import ARLSTem
 import snowballstemmer.arabic_stemmer
 import snowballstemmer_modified.arabic_stemmer 
 import naftawayh.wordtag
@@ -858,6 +859,18 @@ class abstractIsri(ISRIStemmer):
     def getroot(self,word):
         """ get a root from word"""
         return self.stem(word)
+#Define an abstract Class for stemmer
+class abstractARLSTem(ARLSTem):
+    """ I will make more options for stemmer """
+    def __init__(self,):
+        ARLSTem.__init__(self)
+        pass
+    def getstem(self,word):
+        """ get a stem from word"""
+        return self.stem(word)
+    def getroot(self,word):
+        """ get a root from word"""
+        return self.stem(word)
         
         
 #Define an abstract Class for stemmer
@@ -1012,6 +1025,7 @@ class factory_stemmer(object):
         "custom-tag-root",
         "custom-tag",
         "isri",
+        "arlstem",
         "isri+rooter",
         "assem",
         "assem-stemmer",
@@ -1043,6 +1057,9 @@ class factory_stemmer(object):
         elif name == "isri":
             """ no options"""
             asl = abstractIsri()
+        elif name == "arlstem":
+            """ no options"""
+            asl = abstractARLSTem()
         elif name == "isri+rooter":
             """ no options"""
             asl = abstractIsri_custom()

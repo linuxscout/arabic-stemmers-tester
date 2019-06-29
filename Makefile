@@ -6,6 +6,7 @@ SCRIPT :=scripts
 VERSION=0.4
 DOC="."
 DATE=`echo date`
+NORMOPT=
 #directory to store data genered by extrernal stemmers
 EXTRN_DATA_DIR=output/processed
 #DataSets
@@ -18,6 +19,7 @@ DATA_WORDS=words.csv
 DATA_QWC=qwc.csv
 #~ DATA_KB=kabi.csv
 DATA_KB=kabi.v2.csv
+DATA_QLB=qlbstem.unq.csv
 # default data sets
 DATA=${DATA_QI}
 #External stemmers directories
@@ -47,8 +49,9 @@ farasa_quran_index farasa_qi:DATA=${DATA_QI}
 farasa_words:DATA=${DATA_WORDS}
 farasa_qwc:DATA=${DATA_QWC}
 farasa_kb:DATA=${DATA_KB}
+farasa_qlb:DATA=${DATA_QLB}
 
-farasa farasa_words farasa_quran_index farasa_qi farasa_gold farasa_quranic_corpus farasa_qc farasa_nafis farasa_qwc farasa_kb: 
+farasa farasa_words farasa_quran_index farasa_qi farasa_gold farasa_quranic_corpus farasa_qc farasa_nafis farasa_qwc farasa_kb farasa_qlb: 
 	#Generate stemmed data by Farasa stemmer
 	# extract only words columns
 	cut -f1 samples/${DATA}  > /tmp/test-in.txt
@@ -73,8 +76,9 @@ khoja_quran_index khoja_qi:DATA=${DATA_QI}
 khoja_words:DATA=${DATA_WORDS}
 khoja_qwc:DATA=${DATA_QWC}
 khoja_kb:DATA=${DATA_KB}
+khoja_qlb:DATA=${DATA_QLB}
 
-khoja khoja_words khoja_quran_index  khoja_gold khoja_quranic_corpus khoja_qc khoja_qi khoja_nafis khoja_qwc khoja_kb:
+khoja khoja_words khoja_quran_index  khoja_gold khoja_quranic_corpus khoja_qc khoja_qi khoja_nafis khoja_qwc khoja_kb khoja_qlb:
 	#Generate stemmed data by khoja stemmer
 	# extract only words columns
 	cut -f1 samples/${DATA}  > /tmp/test-in.txt
@@ -96,8 +100,9 @@ moataz_quran_index moataz_qi:DATA=${DATA_QI}
 moataz_words:DATA=${DATA_WORDS}
 moataz_qwc:DATA=${DATA_QWC}
 moataz_kb:DATA=${DATA_KB}
+moataz_qlb:DATA=${DATA_QLB}
 
-moataz moataz_words moataz_quran_index  moataz_gold moataz_quranic_corpus moataz_qc moataz_qi moataz_nafis moataz_qwc moataz_kb:
+moataz moataz_words moataz_quran_index  moataz_gold moataz_quranic_corpus moataz_qc moataz_qi moataz_nafis moataz_qwc moataz_kb moataz_qlb:
 	#Generate stemmed data by moataz stemmer
 	# extract only words columns
 	cut -f1 samples/${DATA}  > /tmp/test-in.txt
@@ -123,8 +128,9 @@ assem_quran_index assem_qi:DATA=${DATA_QI}
 assem_words:DATA=${DATA_WORDS}
 assem_qwc:DATA=${DATA_QWC}
 assem_kb:DATA=${DATA_KB}
+assem_qlb:DATA=${DATA_QLB}
 
-assem assem_words assem_quran_index  assem_gold assem_quranic_corpus assem_qc assem_qi assem_nafis assem_qwc assem_kb:
+assem assem_words assem_quran_index  assem_gold assem_quranic_corpus assem_qc assem_qi assem_nafis assem_qwc assem_kb assem_qlb:
 	python scripts/test_assem_isri_stemmer.py -f samples/${DATA} -o ${EXTRN_DATA_DIR}/${DATA}.assem 
 
 
@@ -139,6 +145,7 @@ quran_index qi:DATA=${DATA_QI}
 words:DATA=${DATA_WORDS}
 qwc:DATA=${DATA_QWC}
 kb:DATA=${DATA_KB}
+qlb:DATA=${DATA_QLB}
 # test all datasets with all stemmers
 #~ test_all_data: OPTIONS=--all
 test_all_data:OPTIONS=
@@ -154,28 +161,31 @@ words_some:OPTIONS=
 words_some:words
 
 
-test words test_some gold quranic_corpus qc quran_index qi nafis qwc kb:
+test words test_some gold quranic_corpus qc quran_index qi nafis qwc kb qlb:
 	# test stemmers with quran index dataset
 	# run stemmer
 	python scripts/test_stemmers_rooters.py -f samples/${DATA} -o output/${DATA} 
 
 # evaluation when processing is done, and we wan't to process again
+
 eval_quranic_corpus eval_qc: DATA=${DATA_QC}
 eval_gold: DATA=${DATA_GOLD}
+eval_gold: NORMOPT=--normalize
 eval_nafis: DATA=${DATA_NAFIS}
 eval_quran_index eval_qi:DATA=${DATA_QI}
 eval_qwc:DATA=${DATA_QWC}
 eval_kb:DATA=${DATA_KB}
+eval_qlb:DATA=${DATA_QLB}
 
 # eval all stemmers
 #~ eval_all:OPTIONS=--all
 eval_some:OPTIONS=
 eval_some:eval_all
-eval_all:eval_qc eval_gold  eval_qi eval_nafis eval_qwc eval_kb
-eval eval_quranic_corpus eval_qc eval_gold eval_quran_index eval_qi eval_nafis eval_qwc eval_kb:
+eval_all:eval_qc eval_gold  eval_qi eval_nafis eval_qwc eval_kb eval_qlb
+eval eval_quranic_corpus eval_qc eval_gold eval_quran_index eval_qi eval_nafis eval_qwc eval_kb eval_qlb:
 	# test stemmers with quran index dataset
 	# run stemmer
-	python scripts/eval_stemming_result.py -f output/joined/${DATA} -o output/stats/${DATA}.stats ${OPTIONS}
+	python scripts/eval_stemming_result.py -f output/joined/${DATA} ${NORMOPT} -o output/stats/${DATA}.stats ${OPTIONS}
 
 # Show datasets stats
 show_data: show_qc show_qi show_nafis show_gold
@@ -185,7 +195,8 @@ show_nafis: DATA=${DATA_NAFIS}
 show_qi:DATA=${DATA_QI}
 show_qwc:DATA=${DATA_QWC}
 show_kb:DATA=${DATA_KB}
-show_qc show_gold show_qi show_nafis show_qwc show_kb:
+show_qlb:DATA=${DATA_QLB}
+show_qc show_gold show_qi show_nafis show_qwc show_kb show_qlb:
 	# test stemmers with quran index dataset
 	# run stemmer
 	python scripts/show_datasets_stats.py -f samples/${DATA} -o output/${DATA}.sets
@@ -202,6 +213,9 @@ visualize:
 # debug rooter
 debug_qwc:
 	python scripts/test_rooters_debug.py -f samples/qwc.csv -o output/qwc.debug.csv > output/qwc.debug
+debug_klm:
+#~ 	python scripts/test_rooters_debug.py -f samples/klm.1000.csv -o output/klm.debug.csv > output/klm.debug
+	python scripts/test_rooters_debug.py -f samples/klm.csv -o output/klm.debug.csv > output/klm.debug
 debug_nafis:
 	python scripts/test_rooters_debug.py -f samples/nafis.unq -o output/nafis.debug.csv > output/nafis.debug
 debug_gold:
@@ -255,13 +269,14 @@ join_qi:DATA=${DATA_QI}
 join_words:DATA=${DATA_WORDS}
 join_qwc:DATA=${DATA_QWC}
 join_kb:DATA=${DATA_KB}
+join_qlb:DATA=${DATA_QLB}
 
-join join_words   join_gold  join_qc join_qi join_nafis join_qwc join_kb:
+join join_words   join_gold  join_qc join_qi join_nafis join_qwc join_kb join_qlb:
 	# get the second column as stemm result
 	# change the heaer to mention the stemmer
 	# first out put of our stemmers(tashaphyne)
 	# assem and isri
-	cut -f7-12 ${EXTRN_DATA_DIR}/${DATA}.assem  > /tmp/test-out.assem.txt
+	cut -f7-14 ${EXTRN_DATA_DIR}/${DATA}.assem  > /tmp/test-out.assem.txt
 	# moataz
 	cut -f2,3 ${EXTRN_DATA_DIR}/${DATA}.moataz  > /tmp/test-out.moataz.txt
 	# khoja

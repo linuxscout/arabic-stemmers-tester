@@ -257,6 +257,9 @@ class lemmaDict:
         #~ # قضائ، فضائ، كهربائي
         if stem.endswith(araby.ALEF+ araby.YEH_HAMZA) or stem.endswith(araby.ALEF+ araby.WAW_HAMZA):
             stem = stem[:-1] + araby.HAMZA
+        # ؤمن ئمن
+        if stem.startswith(araby.YEH_HAMZA) or stem.startswith(araby.WAW_HAMZA):
+            stem = araby.ALEF_HAMZA_ABOVE + stem[1:] 
         #~ # ة أو ات
         #~ if suffix.startswith(araby.TEH_MARBUTA) or suffix.startswith(araby.ALEF +araby.TEH):
         #~ if suffix.startswith(araby.TEH_MARBUTA) :#or suffix.startswith(araby.ALEF +araby.TEH):

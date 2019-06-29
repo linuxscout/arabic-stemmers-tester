@@ -30,6 +30,7 @@ class abstractTester:
         # root, stem, lemma
         self.method = method
         self.target_column = method        
+        self.normalize_method = ""        
     def is_valid(self, stem):
         """  test if stem is valid """
         return True
@@ -129,10 +130,10 @@ class abstractTester:
             "FN":FN,
             "TP":TP,
             "FP":FP,        
-            'Accuracy': (TP+TN)*100.0/(TP+TN+FP+FN),
-            'F1 score': 2*TP*100.0/(2*TP+FP+FN),
-            'Recall': TP*100.0/(TP+FN),
-            'Precision': TP*100.0/(TP+FP),
+            'Accuracy': round((TP+TN)*100.0/(TP+TN+FP+FN), 2),
+            'F1 score': round(2*TP*100.0/(2*TP+FP+FN), 2),
+            'Recall': round(TP*100.0/(TP+FN), 2),
+            'Precision': round(TP*100.0/(TP+FP), 2),
             })
         dstats = pd.DataFrame(stats_list)
     
@@ -164,23 +165,94 @@ class stemmingTester(abstractTester):
                 return False
         return True
     
-    def normalize(self, word):
+    def normalize2(self, word):
         """  normalize the stem """
+        norms =[]
+        #~ print('normalize stem')
+        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+        inputword = word
         if self.normalize_full:
             word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
             word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)
             word = word.replace(araby.YEH_HAMZA,araby.HAMZA)
             word = word.replace(araby.WAW_HAMZA,araby.HAMZA)
-            #~ word = word.replace(araby.YEH_HAMZA,araby.YEH)
-            #~ word = word.replace(araby.WAW_HAMZA,araby.WAW)
             word = word.replace(araby.ALEF_MAKSURA, araby.YEH)
             # to choose Teh marbuta as Heh or TEH or remove it
             word = word.replace(araby.TEH_MARBUTA, "")
-            #~ word = word.replace(araby.TEH_MARBUTA, araby.TEH)
-
-        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
-        return word
+            word = word.replace(araby.TEH_MARBUTA, araby.TEH)
+            norms.append(word)
+            #~ # Maghribi normaization 
+            word2 = inputword.replace(araby.YEH_HAMZA,araby.YEH)
+            word2 = word2.replace(araby.WAW_HAMZA,araby.WAW)
+            word2 = word2.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
+            word2 = word2.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)           
+            word2 = word2.replace(araby.ALEF_MAKSURA, araby.YEH)        
+            word2 = word2.replace(araby.TEH_MARBUTA, "")
+            norms.append(word2)
+        return norms
+        
     
+    def normalize(self, word):
+        """  normalize the stem """
+        word = re.sub(u"[%s]"%(araby.ALEF_MADDA), araby.HAMZA+araby.ALEF, word)
+        if self.normalize_full:
+            if self.normalize_method == "maghribi":
+                #~ # Maghribi normaization 
+                word = word.replace(araby.YEH_HAMZA,araby.YEH)
+                word = word.replace(araby.WAW_HAMZA,araby.WAW)
+                word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
+                word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)           
+                word = word.replace(araby.ALEF_MAKSURA, araby.YEH)        
+                word = word.replace(araby.TEH_MARBUTA, "")
+            else :
+                word = word.replace(araby.ALEF_HAMZA_ABOVE,araby.ALEF)
+                word = word.replace(araby.ALEF_HAMZA_BELOW,araby.ALEF)
+                word = word.replace(araby.YEH_HAMZA,araby.HAMZA)
+                word = word.replace(araby.WAW_HAMZA,araby.HAMZA)
+                word = word.replace(araby.ALEF_MAKSURA, araby.YEH)
+                # to choose Teh marbuta as Heh or TEH or remove it
+                word = word.replace(araby.TEH_MARBUTA, "")
+                word = word.replace(araby.TEH_MARBUTA, araby.TEH)
+
+        return word
+        
+    def equal2(self, output, origin):
+        """ test if calcuated is equal to origin """
+        # test if normalized choices are equal
+        # Todo
+        if output == origin:
+            return True
+        elif len(output) == len(origin):
+            output_norms = self.normalize(output)
+            origin_norms =self.normalize(origin)
+            for nr  in output_norms:
+                if nr in origin_norms:
+                    return True
+            else:
+                return False
+            #~ return self.normalize(output)[1] in self.normalize(origin)
+        else:
+            #~ if ";" in origin: # multipe choices
+            choices = origin.split(';')
+            choices = [self.normalize(s) for s in choices]
+            return output in choices
+        return False
+    def equal(self, output, origin):
+        """ test if calcuated is equal to origin """
+        # test if normalized choices are equal
+        # Todo
+        if output == origin:
+            return True
+        elif len(output) == len(origin):
+            output_norm = self.normalize(output)
+            origin_norm =self.normalize(origin)
+            return output_norm == origin_norm
+        else:
+            #~ if ";" in origin: # multipe choices
+            choices = origin.split(';')
+            choices = [self.normalize(s) for s in choices]
+            return self.normalize(output) in choices
+        return False
 
 class rootingTester(abstractTester):
     """ Test rooting process"""
@@ -241,10 +313,19 @@ class factory_tester(object):
  
 
 def main(args):
-    stem_tester = stemmingTest()
-    root_tester = rootingTest()
+    stem_tester = stemmingTester()
+    root_tester = rootingTester()
+    word_tuple =[(u"فبييس", u"فبئيس"),
+    (u'أب', u'اب'),
     
-    return 0
+    ]
+    for w1, w2 in word_tuple:
+        nm = stem_tester.equal(w1, w2)
+        print (u"\t".join([w1, w2])).encode('utf8'), nm
+        nm = stem_tester.equal(w1, w2)
+        print (u"\t".join([w2, w1])).encode('utf8'), nm
+            
+
 
 if __name__ == '__main__':
     import sys

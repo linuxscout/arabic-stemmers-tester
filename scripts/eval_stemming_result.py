@@ -45,6 +45,9 @@ def grabargs():
     parser.add_argument("--all", type=bool, nargs='?',
                         const=True, 
                         help="Test all stemmers.")
+    parser.add_argument("--normalize", type=bool, nargs='?',
+                        const=True,
+                        help="use assem normalizing method.")
     args = parser.parse_args()
     return args
 
@@ -53,6 +56,7 @@ def main():
         
     args =grabargs()
     filename = args.filename
+    normalize_method = args.normalize
     outfile = args.outfile
     all_stemmers = args.all
 
@@ -87,6 +91,10 @@ def main():
     dstats.to_csv(outfile+".root", sep='\t', encoding='utf-8')    
     # stem
     tester = abstracttester.factory_tester.create_tester("stem")
+    # add normalize  method
+    #~ print normalize_method
+    if normalize_method:
+        tester.normalize_method = "maghribi"
     dstats = tester.calcul_stats(df, names)
     dstats.to_csv(outfile+".stem", sep='\t', encoding='utf-8')    
     print(dstats)

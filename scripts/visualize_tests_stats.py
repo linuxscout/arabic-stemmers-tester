@@ -198,6 +198,7 @@ output file:
         "qcorpus":{'filename': 'output/stats/qc.unq.stats', 'desc':"Quranic Arabic Corpus"},
         "qwc":{'filename': 'output/stats/qwc.csv.stats', 'desc':"Mushaf Corpus"},
         "kb":{'filename': 'output/stats/kabi.v2.csv.stats', 'desc':"Kabi Corpus"},
+        "qlb":{'filename': 'output/stats/qlbstem.unq.csv.stats', 'desc':"QLB Corpus"},
     }
     pd.options.display.float_format = '{:,.2f}'.format
 
