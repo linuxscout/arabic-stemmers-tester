@@ -151,7 +151,7 @@ qlb:DATA=${DATA_QLB}
 test_all_data:OPTIONS=
 test_all_data:test_all
 test_all:OPTIONS=--all
-test_all: words gold qc qi nafis qwc kb
+test_all: words gold qc qi nafis qwc kb qlb
 
 # test some stemmers
 # only mentioned stemmers 
@@ -188,7 +188,7 @@ eval eval_quranic_corpus eval_qc eval_gold eval_quran_index eval_qi eval_nafis e
 	python scripts/eval_stemming_result.py -f output/joined/${DATA} ${NORMOPT} -o output/stats/${DATA}.stats ${OPTIONS}
 
 # Show datasets stats
-show_data: show_qc show_qi show_nafis show_gold
+show_data: show_qc show_qi show_nafis show_gold show_kb show_qwc show_qlb
 show_qc: DATA=${DATA_QC}
 show_gold: DATA=${DATA_GOLD}
 show_nafis: DATA=${DATA_NAFIS}
@@ -199,9 +199,13 @@ show_qlb:DATA=${DATA_QLB}
 show_qc show_gold show_qi show_nafis show_qwc show_kb show_qlb:
 	# test stemmers with quran index dataset
 	# run stemmer
-	python scripts/show_datasets_stats.py -f samples/${DATA} -o output/${DATA}.sets
+	python scripts/show_datasets_stats.py -f samples/${DATA} -o output/datasets_stats/${DATA}.sets >> output/datasets_stats/global.sets
 
-
+join_data:
+	cat output/datasets_stats/*.stats |sort > output/datasets_stats/global.sets
+	# remove brackets
+	sed -i -r "s/(\[|\])//g"  output/datasets_stats/global.sets
+	
 visualize:
 	echo " generate latex and charts "
 	cd output/visuale/; tar cvfz  archives/arx-${shell date +'%Y-%m-%d.%H:%M'}.tar.gz \
@@ -261,7 +265,7 @@ zip:
 	tar cvfz releases/rooter.${shell date +'%Y-%m-%d'}.tar.gz  rooter/   scripts/ samples/ output/joined output/processed output/stats output/test_stats output/visuale/images/ output/visuale/pivots/ README.md  Makefile test_win.bat
 
 
-join_all: join_words join_gold  join_qc join_qi join_nafis join_qwc join_kb
+join_all: join_words join_gold  join_qc join_qi join_nafis join_qwc join_kb join_qlb
 join_qc: DATA=${DATA_QC}
 join_gold: DATA=${DATA_GOLD}
 join_nafis: DATA=${DATA_NAFIS}
@@ -303,3 +307,5 @@ help:
 	# make visualize
 	echo "help"
 	
+basic:
+	python scripts/basicrooter.py -f samples/klm.csv -o output/klm.basic.csv > output/klm.basic.out.csv 
