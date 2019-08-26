@@ -151,9 +151,9 @@ def plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir):
         # generate data to latex
         latexer.latex_string(df_pivot, caption=caption, label=label)
         # generate the latex figure code
-        latexer.figure_latex_string(caption=caption, label=label)
+        #~ latexer.figure_latex_string(caption=caption, label=label)
         # generate data to latex
-        latexer.latex_string(df_pivot_global, caption="Global pivot", label="globle pivot")
+        #~ latexer.latex_string(df_pivot_global, caption="Global pivot", label="globle pivot")
         # save
         #~ latexer.save(outputfile)
 
