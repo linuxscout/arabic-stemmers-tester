@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 #  
 #  
-NOUN_AFFIX_LIST= [u'-',
+NOUN_AFFIX_LIST= set([u'-',
  u'-ا',
  u'-ات',
  u'-اتك',
@@ -2198,7 +2198,8 @@ NOUN_AFFIX_LIST= [u'-',
  u'ولل-ية',
  u'ولل-يتين',
  u'ولل-ين']
-VERB_AFFIX_LIST= [u'-',
+)
+VERB_AFFIX_LIST= set([u'-',
  u'-ا',
  u'-اك',
  u'-اكم',
@@ -6077,7 +6078,8 @@ VERB_AFFIX_LIST= [u'-',
  u'ي-وهم',
  u'ي-وهما',
  u'ي-وهن']
-NOUN_PREFIX_LIST= [u'',
+)
+NOUN_PREFIX_LIST= set([u'',
  u'آل',
  u'أ',
  u'أب',
@@ -6125,7 +6127,8 @@ NOUN_PREFIX_LIST= [u'',
  u'وكال',
  u'ول',
  u'ولل']
-NOUN_SUFFIX_LIST= [u'',
+)
+NOUN_SUFFIX_LIST= set([u'',
  u'ا',
  u'ات',
  u'اتك',
@@ -6227,7 +6230,8 @@ NOUN_SUFFIX_LIST= [u'',
  u'يهم',
  u'يهما',
  u'يهن']
-VERB_PREFIX_LIST= [u'',
+)
+VERB_PREFIX_LIST= set([u'',
  u'أ',
  u'أأ',
  u'أت',
@@ -6302,7 +6306,8 @@ VERB_PREFIX_LIST= [u'',
  u'ون',
  u'وي',
  u'ي']
-VERB_SUFFIX_LIST= [u'',
+)
+VERB_SUFFIX_LIST= set([u'',
  u'ا',
  u'اك',
  u'اكم',
@@ -6462,7 +6467,8 @@ VERB_SUFFIX_LIST= [u'',
  u'يهم',
  u'يهما',
  u'يهن']
+)
  # All affixes
-AFFIX_LIST = set(VERB_AFFIX_LIST+NOUN_AFFIX_LIST)
-STEMMING_SUFFIX_LIST=set(VERB_SUFFIX_LIST+NOUN_SUFFIX_LIST)
-STEMMING_PREFIX_LIST=set(VERB_PREFIX_LIST+NOUN_PREFIX_LIST)
+AFFIX_LIST = set(list(VERB_AFFIX_LIST)+list(NOUN_AFFIX_LIST))
+STEMMING_SUFFIX_LIST=set(list(VERB_SUFFIX_LIST) + list(NOUN_SUFFIX_LIST))
+STEMMING_PREFIX_LIST=set(list(VERB_PREFIX_LIST)+ list(NOUN_PREFIX_LIST))
