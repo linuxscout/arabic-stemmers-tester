@@ -137,7 +137,7 @@ def generate_pivots(df_global, method, field):
         
         return df_pivot_global, df_pivot
         
-def plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir):
+def plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir, options=[]):
         """ display a plot and latex """
         caption =   "%s for %s Extraction evaluation"%(field, method)        
         label = "%s-%s"%(method, field.replace(' ','-'))
@@ -149,11 +149,14 @@ def plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir):
 
         df_pivot_global.to_csv(os.path.join(outdir,"pivots/global-%s.csv"%method), sep='\t',encoding='utf8')
         # generate data to latex
-        latexer.latex_string(df_pivot, caption=caption, label=label)
+        if "pivot" in options:
+            latexer.latex_string(df_pivot, caption=caption, label=label)
         # generate the latex figure code
-        #~ latexer.figure_latex_string(caption=caption, label=label)
+        if "figure" in options:
+            latexer.figure_latex_string(caption=caption, label=label)
         # generate data to latex
-        #~ latexer.latex_string(df_pivot_global, caption="Global pivot", label="globle pivot")
+        if "global" in options:
+            latexer.latex_string(df_pivot_global, caption="Global pivot", label="globle pivot")
         # save
         #~ latexer.save(outputfile)
 
@@ -227,12 +230,15 @@ output file:
     {'method':'stem', 'field':'F1 score'},
     {'method':'stem', 'field':'Accuracy'},
     ]
+    options = ["pivot", #~ "figure",     #~ "global",
+    ]
+    
     for mych in mycharts:
         field = mych.get('field','')
         method =  mych.get('method','') 
         df_global = dataframes[method]
         df_pivot_global, df_pivot = generate_pivots(df_global, method, field) 
-        plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir)
+        plot_latex(latexer, method, field, df_pivot, df_pivot_global, outdir, options)
     latexer.save(outfile)
 
     df_global.to_csv(os.path.join(outdir,"global.stats.csv"), sep='\t', encoding='utf8')
