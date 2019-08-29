@@ -208,8 +208,7 @@ join_data:
 	
 visualize:
 	echo " generate latex and charts "
-	cd output/visuale/; tar cvfz  archives/arx-${shell date +'%Y-%m-%d.%H:%M'}.tar.gz \
-	pivots  images visualize.* global.stats.csv
+	cd output/visuale/; tar cvfz  archives/arx-${shell date +'%Y-%m-%d.%H:%M'}.tar.gz  pivots  images visualize.* global.stats.csv
 	python scripts/visualize_tests_stats.py -f output/stats/qc.unq.stats -o output/visuale/
 
 
@@ -262,7 +261,7 @@ eval_some_win:
 	python scripts\eval_stemming_result.py -f output\kabi.csv -o output\kabi.csv.stats
 
 zip:
-	tar cvfz releases/rooter.${shell date +'%Y-%m-%d'}.tar.gz  rooter/   scripts/ samples/ output/joined output/processed output/stats output/test_stats output/visuale/images/ output/visuale/pivots/ README.md  Makefile test_win.bat
+	tar cvfz releases/rooter.${shell date +'%Y-%m-%d'}.tar.gz  rooter/   scripts/ samples/ output/joined output/processed output/stats output/test_stats output/visuale/images/ output/visuale/pivots/ README.md  Makefile
 
 
 join_all: join_words join_gold  join_qc join_qi join_nafis join_qwc join_kb join_qlb
@@ -280,15 +279,17 @@ join join_words   join_gold  join_qc join_qi join_nafis join_qwc join_kb join_ql
 	# change the heaer to mention the stemmer
 	# first out put of our stemmers(tashaphyne)
 	# assem and isri
-	cut -f7-14 ${EXTRN_DATA_DIR}/${DATA}.assem  > /tmp/test-out.assem.txt
+	mkdir -p output/tmp
+	cut -f7-14 ${EXTRN_DATA_DIR}/${DATA}.assem  > output/tmp/test-out.assem.txt
 	# moataz
-	cut -f2,3 ${EXTRN_DATA_DIR}/${DATA}.moataz  > /tmp/test-out.moataz.txt
+	cut -f2,3 ${EXTRN_DATA_DIR}/${DATA}.moataz  > output/tmp/test-out.moataz.txt
 	# khoja
-	cut -f2,3 ${EXTRN_DATA_DIR}/${DATA}.khoja  > /tmp/test-out.khoja.txt
+	cut -f2,3 ${EXTRN_DATA_DIR}/${DATA}.khoja  > output/tmp/test-out.khoja.txt
 	# farasa
-	cut -f3,4 ${EXTRN_DATA_DIR}/${DATA}.farasa  > /tmp/test-out.farasa.txt
+	cut -f3,4 ${EXTRN_DATA_DIR}/${DATA}.farasa  > output/tmp/test-out.farasa.txt
 	# join
-	paste output/${DATA} /tmp/test-out.assem.txt /tmp/test-out.moataz.txt 	/tmp/test-out.khoja.txt  /tmp/test-out.farasa.txt > output/joined/${DATA}
+	paste output/${DATA} output/tmp/test-out.assem.txt output/tmp/test-out.moataz.txt 	output/tmp/test-out.khoja.txt  output/tmp/test-out.farasa.txt > output/joined/${DATA}
+
 help:
 	# To process external stemmers do
 	# step 1
@@ -306,6 +307,42 @@ help:
 	##step 5
 	# make visualize
 	echo "help"
+winbat_test:COMMAND=test_all
+winbat_join:COMMAND=join_all
+winbat_eval:COMMAND=eval_all
+winbat_viz:COMMAND=visualize
+winbat_test winbat_join winbat_eval winbat_viz:
+	make --dry-run ${COMMAND}  > win_bat/${COMMAND}.bat
+	sed -i  "s/#/rem /g" win_bat/${COMMAND}.bat
+	sed -i  's/\//\\/g' win_bat/${COMMAND}.bat
+	sed -i  's/^make/rem make/g' win_bat/${COMMAND}.bat
+	cp win_bat/${COMMAND}.bat win_bat/${COMMAND}.bat.txt
+	
+winbat: winbat_test winbat_join winbat_eval winbat_viz winbat_zip
+#~ 	make --dry-run test_all  > win_bat/test_all.bat
+#~ 	sed -i  "s/#/;/g" win_bat/test_all.bat
+#~ 	sed -i  's/\//\\/g' win_bat/test_all.bat
+#~ 	sed -i  's/^make/;; make/g' win_bat/test_all.bat
+#~ 	make --dry-run join_all  > win_bat/join_all.bat
+#~ 	sed -i  "s/#/;/g" win_bat/join_all.bat
+#~ 	sed -i  's/\//\\/g' win_bat/join_all.bat
+#~ 	sed -i  's/^make/;; make/g' win_bat/join_all.bat	
+#~ 	make --dry-run eval_all  > win_bat/eval_all.bat
+#~ 	sed -i  "s/#/;/g" win_bat/eval_all.bat
+#~ 	sed -i  's/\//\\/g' win_bat/eval_all.bat
+#~ 	sed -i  's/^make/;; make/g' win_bat/eval_all.bat		
+#~ 	make --dry-run visualize  > win_bat/visualize.bat
+#~ 	sed -i  "s/#/;/g" win_bat/visualize.bat
+#~ 	sed -i  's/\//\\/g' win_bat/visualize.bat
+#~ 	sed -i  's/^make/;; make/g' win_bat/visualize.bat
+#~ 	mv win_bat/eval_all.bat win_bat/eval_all.bat.txt
+#~ 	mv win_bat/join_all.bat win_bat/join_all.bat.txt
+#~ 	mv win_bat/test_all.bat win_bat/test_all.bat.txt
+#~ 	mv win_bat/visualize.bat win_bat/visualize.bat.txt
+#~ 	zip win_bat/*.bat.txt 
+winbat_zip:
+	zip win_bat/winbat.zip win_bat/*.txt 
+
 	
 basic:
 	python scripts/basicrooter.py -f samples/klm.csv -o output/klm.basic.csv > output/klm.basic.out.csv 

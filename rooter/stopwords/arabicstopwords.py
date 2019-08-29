@@ -23,8 +23,8 @@
 #  
 
 import pyarabic.araby as araby
-import qalsadi.stopwords
-STOPWORDS =  qalsadi.stopwords.STOPWORDS
+import tashaphyne.stopwords
+STOPWORDS =  tashaphyne.stopwords.STOPWORDS
 def is_stop(word):
     """ test if word is a stop"""
     return word in STOPWORDS
@@ -42,7 +42,7 @@ def stop_root(word):
 
 def main(args):
     word = u"لعلهم"
-    print stop_stem(word)
+    print(stop_stem(word))
     return 0
     
 if __name__ == '__main__':

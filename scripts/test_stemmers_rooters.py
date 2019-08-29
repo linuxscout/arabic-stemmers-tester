@@ -16,7 +16,12 @@
     Provides routins  to analyze text.
     Can treat text as verbs or as nouns.
 """
-
+from __future__ import (
+    absolute_import,
+    print_function,
+    unicode_literals,
+    division,
+    )
 import sys
 sys.path.append('../rooter')
 sys.path.append('rooter')
@@ -172,7 +177,7 @@ if __name__ == '__main__':
           encoding = "utf-8",
           skiprows=1)
     except:
-        print " Can't Open the given File ", filename;
+        print(" Can't Open the given File ", filename)
         sys.exit();
 
     # used to choose between stemmers classes, in order to avoid re-runing
